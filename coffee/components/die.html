@@ -1,0 +1,26 @@
+<div id="<%- guid %>">
+    <div class="die faces<%- faces %>" title="Click to roll">
+        <div class="face"><%- face %></div>
+    </div>
+</div>
+
+<style type="text/css">
+.die {
+    width: 32px;
+    height: 32px;
+
+    cursor: pointer;
+}
+
+.die .face{
+    height: 32px;
+    width: 32px;
+
+    font-size: large;
+    font-weight: bold;
+
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+</style>
