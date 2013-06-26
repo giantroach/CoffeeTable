@@ -1,7 +1,7 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global coffee */
 
-coffee.include("Component", function (name, ext) {
+coffee.include("Component", "components.html", [], function (name, ext) {
     "use strict";
 
     var $ = ext.$,
@@ -124,6 +124,21 @@ coffee.include("Component", function (name, ext) {
         refresh: function (data) {
             this.set(data);
             return this;
+        },
+
+        /**
+         * Rotate option
+         */
+        rotate: function () {
+            var rotate = Number(this.get("rotate")) + 90;
+            if (rotate > 359) {
+                rotate = rotate - 360;
+            }
+
+            this.set("rotate", rotate);
+            this.sendSav();
+
+            return rotate;
         }
     });
 
@@ -141,17 +156,29 @@ coffee.include("Component", function (name, ext) {
          * Send query to iterate and refresh all belonging models
          */
         refresh: function () {
-            var c, That = this;
+            var c,
+                That = this,
+                name = this.prototype.name;
 
-            $.couch.db(ext.def.project).openDoc(this.prototype.name, {
+            $.couch.db(ext.def.project).openDoc(name, {
                 success: function (res) {
-                    var grpKey, modelKey, model, data, found;
+                    var grpKey, modelKey, model, data, found, cssText;
 
-                    //TODO: when data is deleted
+                    // load css along with param stored in DB
+                    if (That.css) {
+                        cssText = ext.cssConverter(That.css(res), name);
+
+                        ext.cssForge(cssText, name, {
+                            loadThisCss: true
+                        });
+
+                        That.css = null;
+                    }
 
                     // iteration for each group
                     for (grpKey in res) {
-                        if (res.hasOwnProperty(grpKey) && grpKey[0] !== "_") {
+                        if (res.hasOwnProperty(grpKey) && grpKey[0] !== "_" && grpKey !== "css") {
+
                             data = res[grpKey];
 
                             // if collection is not created, create it here now!
@@ -161,7 +188,7 @@ coffee.include("Component", function (name, ext) {
                             }
 
                             // to check if some models r deleted
-                            found = []
+                            found = [];
 
                             // iteration for each data (models)
                             for (modelKey in data) {
@@ -195,7 +222,7 @@ coffee.include("Component", function (name, ext) {
                             }), function (model) {
                                 // one which deleted
                                 model.destroy();
-                            })
+                            });
 
                         }
                     }
@@ -238,10 +265,13 @@ coffee.include("Component", function (name, ext) {
             this.model.bind("change", function (model) {
                 that.render(model.attributes);
             });
-            
-            this.model.bind("destroy", function (model) {
+
+            this.model.bind("destroy", function () {
                 that.remove();
             });
+
+            //initialize options before view is being instanced
+            this.initOpt();
         },
 
         render: function (data) {
@@ -257,6 +287,26 @@ coffee.include("Component", function (name, ext) {
             this.$el.html(this.template(data));
 
             return this;
+        },
+
+        // Initialize each options
+        initOpt: function () {
+            this.events = this.events || {};
+
+            if (this.model.get("rotate")) {
+                this.events["mousedown"] = "mousedown";
+            }
+
+            this.delegateEvents();
+        },
+
+        mousedown: function (e) {
+            if (e.which === 3) {
+                //right click
+                this.model.rotate();
+                e.preventDefault();
+                return false;
+            }
         }
     });
 
@@ -268,4 +318,6 @@ coffee.include("Component", function (name, ext) {
         v : v[name]
     };
 
+}, {
+    loadCssImmediate: true
 });

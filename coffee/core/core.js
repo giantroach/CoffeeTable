@@ -21,6 +21,12 @@ var coffee = (function (ext) {
         loading = [];
 
 
+    //disable contextmenu for components like rotate option
+    $(d).bind("contextmenu", function(e) {
+        return false;
+    });
+
+
     return {
         $: $,
         _: _,
@@ -39,29 +45,75 @@ var coffee = (function (ext) {
         /**
          * Include component into coffee name space
          * @method include
-         * @param {String} arg1 name
+         * @param {String} name name
          * @param {String} arg2 URI to load html (Optional)
-         * @param {Function} arg3 callback
+         * @param {Array} arg3 Array of dependency
+         * @param {Function} arg4 callback
+         * @param {Object} arg4 option (optional)
+         * <ul>
+         * <li>loadCssImmediate{Boolean}: if loads css immediate without using template.</li>
+         * </ul>
          * @return {this}
          */
-        include: function (name, arg2, arg3) {
-            var uri = arg3 ? arg2 : "",
-                func = arg3 || arg2;
+        include: function (name, arg2, arg3, arg4, arg5) {
+            var uri, dependencies, func, opt,
+                args = arguments,
+                that = this;
+
+            if (typeof arg2 === "string") {
+                uri = arg2;
+                dependencies = arg3 || [];
+                func = arg4;
+                opt = arg5 || {};
+
+            } else {
+                uri = "";
+                dependencies = arg2 || [];
+                func = arg3;
+                opt = arg4 || {};
+            }
+
+            // set delay if module defined some dependencies
+            if (_.find(loading, function (module) { return _.contains(dependencies, module); })) {
+                setTimeout(function () {
+                    that.include.apply(that, args);
+                }, 100);
+                return this;
+            }
 
             if (uri) {
                 // if uri is specified, load html and append it as template
                 loading.push(name);
                 this.include_html(uri, function (str) {
+                    var fragments, htmlTemplate, cssTemplate;
+
+                    if (opt.loadCssImmediate) {
+                        htmlTemplate = _.template(this.cssForge(str, name));
+                        cssTemplate = null;
+
+                    } else {
+                        fragments = this.cssForge(str, name, {
+                            cssLoadDelay: true
+                        });
+
+                        htmlTemplate = _.template(fragments[0]);
+                        cssTemplate = _.template(fragments[1]);
+                    }
+
                     this.include_js(name, func);
                     this.v[name] = this.v[name].extend({
-                        template: _.template(this.cssForge(str, name))
+                        template: htmlTemplate
                     });
+
+                    this.c[name].css = cssTemplate;
                     loading = _.without(loading, name);
+
                 });
 
             } else {
-                // if no uri is specified, just include html
+                // if no uri is specified, just include javascript
                 this.include_js(name, func);
+                loading = _.without(loading, name);
             }
 
             return this;
@@ -90,8 +142,9 @@ var coffee = (function (ext) {
          * @return {this}
          */
         include_js: function (name, func) {
-            var key,
-                obj = func(name, this);
+            var key, obj;
+
+            obj = func(name, this);
 
             // add "name" property for all objects, and then add it to "this"
             for (key in obj) {
@@ -109,6 +162,11 @@ var coffee = (function (ext) {
          * Combine multiple css into one to avoid several problems
          * @method cssForge
          * @param {String} html Style text which to be merged
+         * @param {Object} opt Options below
+         * <ul>
+         * <li>cssLoadDelay{Boolean}: Do not Append css. When this option is given, returns array of [HTML, CSS] instead.</li>
+         * <li>loadThisCss{Boolean}: load given "html" argument as css.</li>
+         * </ul>
          * @return {String} Remainings of style
          */
         cssForge: (function () {
@@ -121,19 +179,30 @@ var coffee = (function (ext) {
                 $(d.body).append(forge);
             }
 
-            return function (html, id) {
-                var stampFragment,
+            return function (html, id, opt) {
+                var htmlFragment, melt, stampFragment,
                     stamp = "/*### " + (id || "") + " ###*/\r\n",
 
-                    rxStyle = /<\/?style[^>]*>/gi,
-                    htmlFragment = html.split(rxStyle),
-                    melt = forge.innerHTML.split(rxStyle);
+                    rxStyle = /<\/?style[^>]*>/gi;
+
+                // HTML
+                if (opt && opt.loadThisCss) {
+                    htmlFragment = ["", html, ""];
+                } else {
+                    htmlFragment = html.split(rxStyle);
+                }
 
                 // if there's no style tag (as there can be given id in the forge, we still have to proceed)
                 if (htmlFragment.length === 1) {
-                    htmlFragment = ["", html, ""];
+                    htmlFragment = [html, "", ""];
                 }
 
+                if (opt && opt.cssLoadDelay) {
+                    return [htmlFragment[0] + htmlFragment[2], htmlFragment[1]];
+                }
+
+                // CSS
+                melt = forge.innerHTML.split(rxStyle);
                 // if forge is empty or no corresponding stump is found
                 if (melt.length === 1) {
                     melt = ["", melt[0], ""];
@@ -145,11 +214,33 @@ var coffee = (function (ext) {
                     melt[1] = stampFragment[0] + stampFragment[2];
                 }
 
+                // Do forge
                 forge.innerHTML = '<div>&nbsp;</div><style type="text/css">' + melt[1] + stamp + htmlFragment[1] + stamp + '</style>';
 
                 return htmlFragment[0] + htmlFragment[2];
             };
         }()),
+
+        /**
+         * Convert back CSS text to some how convenient form
+         * @method cssConverter
+         * @param {String} str Css text which is escaped by <%-
+         * @param {String} name Name for trace (optional)
+         * @return {String}
+         */
+        cssConverter: function (str, name) {
+            str = str || "";
+
+            if (str.indexOf("javascript") >= 0 || str.indexOf("expression") >= 0) {
+                w.alert("Suspicious CSS detected" + (name ? " [" + name + "] " : "") + ". Css disabled.");
+                return "";
+            }
+
+            // replace back "/"
+            str = str.replace(/&#x2F;/g, "/");
+
+            return str;
+        },
 
         /**
          * Generate GUID
@@ -206,6 +297,7 @@ var coffee = (function (ext) {
                 that = this,
                 c = this.c;
 
+            // wait for all components to be loaded
             if (loading.length) {
                 return w.setTimeout(function () {
                     that.letsPlay.apply(that, arguments);
