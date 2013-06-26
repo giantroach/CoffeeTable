@@ -1,7 +1,7 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global coffee */
 
-coffee.include("Die", "die.html", function (name, ext) {
+coffee.include("Die", "die.html", ["Component"], function (name, ext) {
     "use strict";
 
     var $ = ext.$,
