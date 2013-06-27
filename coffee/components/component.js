@@ -240,6 +240,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
         model: null,
 
+        className: "component",
+
         // TODO:Let user to set where to append
         $dest: $("#components_container"),
 
@@ -258,7 +260,10 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 this.init(opt);
             }
 
-            this.render(this.model.attributes);
+            this.render(this.model.attributes, {
+                noAnim: true
+            });
+
             // appends only once
             this.$dest.append(this.$el);
 
@@ -274,7 +279,14 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             this.initOpt();
         },
 
-        render: function (data) {
+        /**
+         * Override function of Backbone.View.render
+         * @method render
+         * @param {Object} data Data to use render. Use model attribute if no data is given. (optional)
+         * @param {Object} opt Option value (optional)
+         * @return {this}
+         */
+        render: function (data, opt) {
             if (!data) {
                 data = this.model.attributes || {};
             }
@@ -286,6 +298,47 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             // TODO:there must be other than replacing option
             this.$el.html(this.template(data));
 
+            if (opt && opt.noAnim) {
+                this.updateStyle(true);
+            } else {
+                this.updateStyle(false);
+            }
+
+            return this;
+        },
+
+        /**
+         * Reset styles according to the properties on model
+         * @method updateStyle
+         * @param anim {Boolean} If do animation
+         * @return this
+         */
+        updateStyle: function (noAnim) {
+            var css = {},
+                attrs = this.model.attributes,
+                keys = _.keys(attrs),
+                styleKeys = _.filter(keys, function (key) {
+                    return (/^css_/).test(key);
+                }),
+                pxSuffixKeys = _.filter(keys, function (key) {
+                    return (/_px_/).test(key);
+                });
+
+            _.each(styleKeys, function (key) {
+                var cssKey = key.replace(/(^css)|(_px_)/g, "");
+
+                css[cssKey] = attrs[key];
+                if (_.contains(pxSuffixKeys, key)) {
+                    css[cssKey] += "px";
+                }
+            });
+
+            if (noAnim) {
+                this.$el.css(css);
+            } else {
+                this.$el.animate(css);
+            }
+
             return this;
         },
 
@@ -294,12 +347,17 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             this.events = this.events || {};
 
             if (this.model.get("rotate")) {
-                this.events["mousedown"] = "mousedown";
+                this.events.mousedown = "mousedown";
+            }
+
+            if (this.model.get("draggable")) {
+                this.dndHandle(this.$el);
             }
 
             this.delegateEvents();
         },
 
+        //mousedown handler
         mousedown: function (e) {
             if (e.which === 3) {
                 //right click
@@ -307,6 +365,22 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 e.preventDefault();
                 return false;
             }
+        },
+
+        //drag and drop handler
+        dndHandle: function ($el) {
+            var that = this;
+
+            // enable drag and drop
+            $el.draggable()
+                .addClass("draggable")
+                .bind("dragstop", function (e, ui) {
+                    that.model.set({
+                        css_px_top: ui.position.top,
+                        css_px_left: ui.position.left
+                    });
+                    that.model.sendSav();
+                });
         }
     });
 
