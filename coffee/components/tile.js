@@ -21,6 +21,22 @@ coffee.include("Tile", "tile.html", ["Component"], function (name, ext) {
 
     // Collection
     c[name] = ext.c.Component.extend({
+    }, {
+        addRandom: function (grp) {
+            var name = this.prototype.name,
+                m = new ext.m[name],
+                templates = this.def.templates[grp],
+                rand = _.random(0, templates.length - 1);
+
+            m.set(_.extend({
+                grp: grp,
+                text: "",
+                draggable: true,
+                rotate: 0
+            }, templates[rand]));
+
+            m.sendSav();
+        }
     });
 
     // View

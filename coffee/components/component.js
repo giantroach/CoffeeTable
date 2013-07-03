@@ -4,7 +4,8 @@
 coffee.include("Component", "components.html", [], function (name, ext) {
     "use strict";
 
-    var $ = ext.$,
+    var _ = ext._,
+        $ = ext.$,
         Backbone = ext.Backbone,
         m = {},
         c = {},
@@ -19,9 +20,17 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
         //Backbone.Model.initialize
         initialize: function (opt) {
+            opt = opt || {};
+
             if (!opt.guid) {
-                this.set("guid", ext.genGuid(this.name + "_"));
+                opt.guid = ext.genGuid(this.name + "_");
             }
+
+            // set default value to avoid unnecessary script error
+            opt = _.extend({
+                rotate: "",
+                cls: ""
+            }, opt);
 
             if (opt) {
                 this.set(opt);
@@ -148,7 +157,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         initialize: function (models, grp) {
             this.model = ext.m[this.name];
             this.grp = grp || "data";
-            this.constructor.children[this.grp] = this;
+            this.constructor.children[this.name] = this.constructor.children[this.name] || {};
+            this.constructor.children[this.name][this.grp] = this;
         }
 
     }, {
@@ -177,14 +187,19 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
                     // iteration for each group
                     for (grpKey in res) {
-                        if (res.hasOwnProperty(grpKey) && grpKey[0] !== "_" && grpKey !== "css") {
+                        if (res.hasOwnProperty(grpKey)
+                                && grpKey[0] !== "_"
+                                && grpKey[0] !== "$") {
 
                             data = res[grpKey];
 
                             // if collection is not created, create it here now!
-                            c = That.children[grpKey];
+                            if (That.children[name]) {
+                                c = That.children[name][grpKey];
+                            }
                             if (!c) {
                                 c = new That([], grpKey);
+                                c.$dest = $("#" + data.dest);
                             }
 
                             // to check if some models r deleted
@@ -192,7 +207,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
                             // iteration for each data (models)
                             for (modelKey in data) {
-                                if (data.hasOwnProperty(modelKey)) {
+                                if (data.hasOwnProperty(modelKey)
+                                        && modelKey !== "dest") {
 
                                     model = c.find(function (model) {
                                         return model.get("guid") === modelKey;
@@ -204,7 +220,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
                                     } else {
                                         // model does not exist, create new
-                                        model = (new ext.v[c.name](data[modelKey])).model;
+                                        model = (new ext.v[c.name](data[modelKey], c)).model;
                                         model.set("grp", grpKey);
                                         c.add(model);
                                     }
@@ -226,6 +242,9 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
                         }
                     }
+
+                    // store definition to collection
+                    That.def = res.$_def || {};
                 }
             });
         },
@@ -242,10 +261,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
         className: "component",
 
-        // TODO:Let user to set where to append
-        $dest: $("#components_container"),
-
-        initialize: function (opt) {
+        initialize: function (opt, c) {
             var that = this;
 
             // bind model to the view
@@ -265,7 +281,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             });
 
             // appends only once
-            this.$dest.append(this.$el);
+            c.$dest.append(this.$el);
 
             this.model.bind("change", function (model) {
                 that.render(model.attributes);
