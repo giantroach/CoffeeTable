@@ -172,7 +172,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
             $.couch.db(ext.def.project).openDoc(name, {
                 success: function (res) {
-                    var grpKey, modelKey, model, data, found, cssText;
+                    var grpKey, modelKey, model, data, found, cssText,
+                        $layoutPos, $componentContainer;
 
                     // load css along with param stored in DB
                     if (That.css) {
@@ -199,7 +200,19 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                             }
                             if (!c) {
                                 c = new That([], grpKey);
-                                c.$dest = $("#" + data.dest);
+
+                                $layoutPos = $("#" + data.dest);
+                                $componentContainer = $layoutPos.children("." + name);
+                                if (!$componentContainer.length) {
+                                    $componentContainer = $('<div class="' + name + '"></div>')
+                                        .appendTo($layoutPos);
+                                }
+
+                                c.$dest = $componentContainer.children("." + grpKey);
+                                if (!c.$dest || !c.$dest.length) {
+                                    c.$dest = $('<' + (data.destTag || 'div') + ' class="' + grpKey + '"></div>')
+                                        .appendTo($componentContainer);
+                                }
                             }
 
                             // to check if some models r deleted
@@ -208,7 +221,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                             // iteration for each data (models)
                             for (modelKey in data) {
                                 if (data.hasOwnProperty(modelKey)
-                                        && modelKey !== "dest") {
+                                        && modelKey !== "dest"
+                                        && modelKey !== "destTag") {
 
                                     model = c.find(function (model) {
                                         return model.get("guid") === modelKey;
@@ -259,8 +273,15 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
         model: null,
 
-        className: "component",
+        // common html definition
+        id: function () {
+            return this.options.guid;
+        },
+        className: function () {
+            return "component";
+        },
 
+        //common functionality
         initialize: function (opt, c) {
             var that = this;
 

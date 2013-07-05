@@ -25,6 +25,10 @@ coffee.include("Menu", "menu.html", ["Component"], function (name, ext) {
 
     // View
     v[name] = ext.v.Component.extend({
+        // html definition
+        tagName: "li",
+
+        // function
         init: function () {
             _.bindAll(this, ["hndlEvent"]);
         },
