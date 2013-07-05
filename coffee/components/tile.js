@@ -22,6 +22,12 @@ coffee.include("Tile", "tile.html", ["Component"], function (name, ext) {
     // Collection
     c[name] = ext.c.Component.extend({
     }, {
+        /**
+         * Add Random tile to specified group
+         * @method addRandom
+         * @param {String} grp
+         * @return {this}
+         */
         addRandom: function (grp) {
             var name = this.prototype.name,
                 m = new ext.m[name],
@@ -36,6 +42,37 @@ coffee.include("Tile", "tile.html", ["Component"], function (name, ext) {
             }, templates[rand]));
 
             m.sendSav();
+
+            return this;
+        },
+
+        /**
+         * Add specified tile to specified group
+         * @method addThis
+         * @param {String} grp
+         * @param {Object} args
+         * <ul>
+         * <li>cls: class to adding the tile.</li>
+         * </ul>
+         * @return {this}
+         */
+        addThis: function (grp, args) {
+            var name = this.prototype.name,
+                m = new ext.m[name],
+                template = _.find(this.def.templates[grp], function (obj) {
+                    return obj.cls === args.cls;
+                });
+
+            m.set(_.extend({
+                grp: grp,
+                text: "",
+                draggable: true,
+                rotate: 0
+            }, template));
+
+            m.sendSav();
+
+            return this;
         }
     });
 

@@ -46,7 +46,8 @@ coffee.include("Menu", "menu.html", ["Component"], function (name, ext) {
                 ][
                     handler.method
                 ](
-                    handler.grp
+                    handler.grp,
+                    handler.args
                 );
             }
         }
