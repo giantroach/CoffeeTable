@@ -10,7 +10,43 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         m = {},
         c = {},
         r = {},
-        v = {};
+        v = {},
+
+        /**
+         * Send update data to the server
+         * @method send
+         * @paarm {String} df Design document function (ins/add/sav/del)
+         * @param {Object} data Data to send
+         * @param {Function} suc Callback for success (optional)
+         * @param {Function} err Callback for error (optional)
+         * @return {this}
+         */
+        send = function (df, name, data, suc, err) {
+            var that = this;
+
+            $.ajax({
+                type: "POST",
+                url: "/" + ext.def.project + "/_design/" + ext.def.fw + "/_update/" + df + "/" + name,
+
+                data: data,
+
+                timeout: ext.def.HTTP_TIMEOUT,
+
+                success: function () {
+                    if (suc) {
+                        suc.apply(that, arguments);
+                    }
+                },
+                error : function () {
+                    if (err || suc) {
+                        (err || suc).apply(that, arguments);
+                    }
+                }
+            });
+
+            return this;
+        };
+
 
 
     // Model --------------------------------
@@ -42,41 +78,6 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         },
 
         /**
-         * Send update data to the server
-         * @method send
-         * @paarm {String} df Design document function (ins/add/sav/del)
-         * @param {Object} data Data to send
-         * @param {Function} suc Callback for success (optional)
-         * @param {Function} err Callback for error (optional)
-         * @return {this}
-         */
-        send: function (df, data, suc, err) {
-            var that = this;
-
-            $.ajax({
-                type: "POST",
-                url: "/" + ext.def.project + "/_design/" + ext.def.fw + "/_update/" + df + "/" + this.name,
-
-                data: data,
-
-                timeout: ext.def.HTTP_TIMEOUT,
-
-                success: function () {
-                    if (suc) {
-                        suc.apply(that, arguments);
-                    }
-                },
-                error : function () {
-                    if (err || suc) {
-                        (err || suc).apply(that, arguments);
-                    }
-                }
-            });
-
-            return this;
-        },
-
-        /**
          * Send insert data to the server
          * @method sendIns
          * @param {Function} suc Callback for success (optional)
@@ -84,7 +85,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @return {this}
          */
         sendIns: function (suc, err) {
-            this.send("ins", this.attributes, suc, err);
+            send.call(this, "ins", this.name, this.attributes, suc, err);
             return this;
         },
 
@@ -96,7 +97,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @return {this}
          */
         sendAdd: function (suc, err) {
-            this.send("add", this.attributes, suc, err);
+            send.call(this, "add", this.name, this.attributes, suc, err);
             return this;
         },
 
@@ -108,7 +109,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @return {this}
          */
         sendSav: function (suc, err) {
-            this.send("sav", this.attributes, suc, err);
+            send.call(this, "sav", this.name, this.attributes, suc, err);
             return this;
         },
 
@@ -120,7 +121,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @return {this}
          */
         sendDel: function (suc, err) {
-            this.send("del", this.attributes, suc, err);
+            send.call(this, "del", this.name, this.attributes, suc, err);
             return this;
         },
 
@@ -263,7 +264,63 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             });
         },
 
-        children: {}
+        // internal use...
+        children: {},
+
+        /**
+         * @method updateAll
+         * @param {String} method Method to update the database (corresponding to the design document)
+         * @param {String} grp Group to update.
+         * @param {Object} vals Values to set to update (optional)
+         * @param {Function} suc Callback for success (optional)
+         * @param {Function} err Callback for err (optional)
+         * @return {this}
+         */
+        updateAll: function (method, grp, vals, suc, err) {
+            var i, max,
+                name = this.prototype.name,
+                models = this.children[name][grp],
+                data = {
+                    grp: grp,
+                    data: []
+                };
+
+            for (i = 0, max = models.length; i < max; i += 1) {
+                if (vals) {
+                    models.at(i).set(vals, { silent: true });
+                }
+                data.data.push(models.at(i).attributes);
+            }
+
+            send.call(this, method, name, data, suc, err);
+
+            return this;
+        },
+
+        /**
+         * Hide all belonging views
+         * @method hide
+         * @param {String} grp
+         * @param {Function} suc
+         * @param {Function} err
+         * @return {this}
+         */
+        hide: function (grp, suc, err) {
+            this.updateAll("savAll", grp, { "hide": true }, suc, err);
+            return this;
+        },
+
+        /**
+         * Show all belonging views
+         * @method show
+         * @param {String} grp
+         * @param {Function} suc
+         * @param {Function} err
+         */
+        show: function (grp, suc, err) {
+            this.updateAll("savAll", grp, { "hide": "" }, suc, err);
+            return this;
+        }
     });
 
     // View --------------------------------
@@ -330,6 +387,12 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
             if (!data.guid) {
                 data.guid = this.model.get("guid");
+            }
+
+            if (this.model.get("hide")) {
+                this.$el.hide();
+            } else {
+                this.$el.show();
             }
 
             // TODO:there must be other than replacing option
