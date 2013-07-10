@@ -173,7 +173,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
             $.couch.db(ext.def.project).openDoc(name, {
                 success: function (res) {
-                    var grpKey, modelKey, model, data, found, cssText,
+                    var key, grpKey, modelKey, model, data, found, cssText,
                         $layoutPos, $componentContainer;
 
                     // load css along with param stored in DB
@@ -185,6 +185,22 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                         });
 
                         That.css = null;
+                    }
+
+                    // store definition to collection
+                    // instead of simply add, extends the default_def
+                    if (!That.def) {
+                        That.def = {};
+                    }
+                    if (res.$_def) {
+                        for (key in res.$_def) {
+                            if (res.$_def.hasOwnProperty(key)) {
+                                That.def[key] = _.extend(
+                                    That.default_def || {},
+                                    res.$_def[key]
+                                );
+                            }
+                        }
                     }
 
                     // iteration for each group
@@ -235,7 +251,11 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
                                     } else {
                                         // model does not exist, create new
-                                        model = (new ext.v[c.name](data[modelKey], c)).model;
+                                        if (!That.def[name] || !That.def[name].createWithoutView) {
+                                            model = (new ext.v[name](data[modelKey], c)).model;
+                                        } else {
+                                            model = new ext.m[name](data[modelKey], c);
+                                        }
                                         model.set("grp", grpKey);
                                         c.add(model);
                                     }
@@ -257,9 +277,6 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
                         }
                     }
-
-                    // store definition to collection
-                    That.def = res.$_def || {};
                 }
             });
         },
