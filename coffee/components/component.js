@@ -15,7 +15,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         /**
          * Send update data to the server
          * @method send
-         * @paarm {String} df Design document function (ins/add/sav/del)
+         * @paarm {String} df Design document function (ins/add/sav/del/tra)
          * @param {Object} data Data to send
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
@@ -122,6 +122,23 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          */
         sendDel: function (suc, err) {
             send.call(this, "del", this.name, this.attributes, suc, err);
+            return this;
+        },
+
+        /**
+         * Send transfer data to the server
+         * @method sendTra
+         * @param {String} to Destination grp
+         * @param {Function} suc Callback for success (optional)
+         * @param {Function} err Callback for error (optional)
+         * @return {this}
+         */
+        sendTra: function (to, suc, err) {
+            send.call(this, "tra", this.name, {
+                grp: this.get("grp"),
+                id: this.get("guid"),
+                to: to
+            }, suc, err);
             return this;
         },
 
@@ -251,9 +268,10 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
                                     } else {
                                         // model does not exist, create new
-                                        if (!That.def[name] || !That.def[name].createWithoutView) {
+                                        if (!That.def[name] && data.dest) {
                                             model = (new ext.v[name](data[modelKey], c)).model;
                                         } else {
+                                            // if dest is not defined, just create model instead of view with model
                                             model = new ext.m[name](data[modelKey], c);
                                         }
                                         model.set("grp", grpKey);
@@ -283,6 +301,20 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
         // internal use...
         children: {},
+
+        /**
+         * Send update data to the server
+         * @method send
+         * @paarm {String} df Design document function (ins/add/sav/del/tra)
+         * @param {Object} data Data to send
+         * @param {Function} suc Callback for success (optional)
+         * @param {Function} err Callback for error (optional)
+         * @return {this}
+         */
+        send: function () {
+            send.apply(this, arguments);
+            return this;
+        },
 
         /**
          * @method updateAll
@@ -377,6 +409,10 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
             // appends only once
             c.$dest.append(this.$el);
+
+            if (this.afterRender) {
+                this.afterRender(opt);
+            }
 
             this.model.bind("change", function (model) {
                 that.render(model.attributes);
