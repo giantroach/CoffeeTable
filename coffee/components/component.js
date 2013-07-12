@@ -12,6 +12,13 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         r = {},
         v = {},
 
+        // list of system use properties in grp.
+        sysProps = [
+            "dest",
+            "destTag",
+            "usr"
+        ],
+
         /**
          * Send update data to the server
          * @method send
@@ -255,8 +262,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                             // iteration for each data (models)
                             for (modelKey in data) {
                                 if (data.hasOwnProperty(modelKey)
-                                        && modelKey !== "dest"
-                                        && modelKey !== "destTag") {
+                                        && !_.contains(sysProps, modelKey)) {
 
                                     model = c.find(function (model) {
                                         return model.get("guid") === modelKey;
@@ -268,13 +274,19 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
                                     } else {
                                         // model does not exist, create new
-                                        if (!That.def[name] && data.dest) {
+                                        if (!That.def[name] && data.dest
+                                            && (!(data.usr) || data.usr === ext.usr)) {
+
                                             model = (new ext.v[name](data[modelKey], c)).model;
+
                                         } else {
                                             // if dest is not defined, just create model instead of view with model
                                             model = new ext.m[name](data[modelKey], c);
                                         }
-                                        model.set("grp", grpKey);
+                                        model.set("grp", grpKey, {
+                                            // silent to avoid view to re-render
+                                            silent: true
+                                        });
                                         c.add(model);
                                     }
 

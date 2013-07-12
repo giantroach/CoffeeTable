@@ -310,7 +310,9 @@ var coffee = (function (ext) {
                 }
             }
 
-            this.startPolling();
+            this.c.Login.start(function () {
+                that.startPolling();
+            });
 
             return this;
         }

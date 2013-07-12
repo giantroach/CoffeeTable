@@ -8,7 +8,8 @@
 }
 
 
-
+// for debug
+"function (doc, req) { var key, str = ''; for (key in req.form) { str += (key + ':' + req.form[key] + ';') } return [doc, 'trace : ' + str]; }"
 
 
 // new one
@@ -17,7 +18,11 @@
    "ins": "function (doc, req) { var id = req.form.guid, key = req.form.grp || 'data', data = req.form || {}; data.nm = data.nm || 'anonymous'; data.tm = new Date().toString(); if (!doc[key]) { doc[key] = {}; } if (!doc[key][id]) { doc[key][id] = []; } doc[key][id].push(data); if (doc[key][id].length > (doc.maxline || 1000)) { doc[key][id].splice(0, doc[key][id].length - (doc.maxline || 1000)); } return [doc, 'insert complete : [' + id + ']']; }",
    "add": "function (doc, req) { var itr, id = req.form.guid, key = req.form.grp || 'data', data = req.form || {}; data.nm = data.nm || 'anonymous'; data.tm = new Date().toString(); if (!doc[key]) { doc[key] = {}; } if (doc[key][id]) { for (itr in data) { doc[key][id][itr] = doc[key][id][itr] ? (doc[key][id][itr] + (parseInt(data[itr], 10))) : (parseInt(data[itr], 10) || 0); } } return [doc, 'add complete : [' + id + ']']; }",
    "sav": "function (doc, req) { var id = req.form.guid, key = req.form.grp || 'data', data = req.form || {}; data.nm = data.nm || 'anonymous'; data.tm = new Date().toString(); if (!doc[key]) { doc[key] = {}; } doc[key][id] = data; return [doc, 'update complete : [' + id + ']']; }",
-   "del": "function (doc, req) { var id = req.form.guid, key = req.form.grp || 'data'; if (doc[key] && doc[key][id]) { delete doc[key][id]; } return [doc, 'delete complete : [' + id + ']']; }"
+   "del": "function (doc, req) { var id = req.form.guid, key = req.form.grp || 'data'; if (doc[key] && doc[key][id]) { delete doc[key][id]; } return [doc, 'delete complete : [' + id + ']']; }",
+   "tra": "function (doc, req) { var key, cnt, frm = req.form || {}, from = frm.from, to = frm.to, guid = frm.guid, idx = parseInt(frm.idx, 10); if (!doc[from] || !doc[to]) { return [doc, 'transfer failed : [' + from + ' > ' + to + ']']; } if (guid) { doc[to][guid] = doc[from][guid]; delete doc[from][guid]; return [doc, 'transfer complete : [' + from + ' > ' + to + ' : ' + guid + ']']; } cnt = 0; for (key in doc[from]) { if (cnt === idx || key === guid) { doc[to][key] = doc[from][key]; delete doc[from][key]; break; } cnt += 1; } return [doc, 'transfer complete : [' + from + ' > ' + to + ']']; }",
+
+    "savAll": "function (doc, req) { var i, max, key, id, splitData, frm = req.form || {}, data = [], grp = frm.grp || 'data', nm = frm.nm || 'anonymous', tm = new Date().toString(); for (key in frm) { splitData = key.split(/[\\[\\]]+/g); if (splitData.length === 4) { if (!data[splitData[1]]) { data[splitData[1]] = {}; } data[splitData[1]][splitData[2]] = frm[key]; } } if (!doc[grp]) { doc[grp] = {}; } for (i = 0, max = data.length; i < max; i += 1) { id = data[i].guid; data[i].nm = nm; data[i].tm = tm; doc[grp][id] = data[i] || {}; } return [doc, 'update complete : [' + grp + ']']; }",
+    "delAll": "function (doc, req) { var frm = req.form || {}, grp = frm.grp || 'data'; if (!doc[grp]) { doc[grp] = {}; } else { doc[grp] = { dest: doc[grp].dest, destTag: doc[grp].destTag } } return [doc, 'delete complete : [' + grp + ']']; }"
 }
 
 
@@ -29,3 +34,94 @@ function (doc, req) { var itr, id = req.form.guid, key = req.form.grp || 'data',
 function (doc, req) { var id = req.form.guid, key = req.form.grp || 'data', data = req.form || {}; data.nm = data.nm || 'anonymous'; data.tm = new Date().toString(); if (!doc[key]) { doc[key] = {}; } doc[key][id] = data; return [doc, 'update complete : [' + id + ']']; }
 
 function (doc, req) { var id = req.form.guid, key = req.form.grp || 'data'; if (doc[key] && doc[key][id]) { delete doc[key][id]; } return [doc, 'delete complete : [' + id + ']']; }
+
+
+// save all
+savAll = function (doc, req) {
+    var i, max, key, id, splitData,
+        frm = req.form || {},
+        data = [],
+        grp = frm.grp || 'data',
+        nm = frm.nm || 'anonymous',
+        tm = new Date().toString();
+
+    for (key in frm) {
+        splitData = key.split(/[\\[\\]]+/g);
+        if (splitData.length === 4) {
+            if (!data[splitData[1]]) {
+                data[splitData[1]] = {};
+            }
+            data[splitData[1]][splitData[2]] = frm[key];
+        }
+    }
+
+    if (!doc[grp]) { doc[grp] = {}; }
+
+    for (i = 0, max = data.length; i < max; i += 1) {
+        id = data[i].guid;
+        data[i].nm = nm;
+        data[i].tm = tm;
+
+        doc[grp][id] = data[i] || {};
+    }
+
+    return [doc, 'update complete : [' + grp + ']'];
+}
+
+// delete all
+delAll = function (doc, req) {
+    var frm = req.form || {},
+        grp = frm.grp || 'data';
+
+    if (!doc[grp]) {
+        doc[grp] = {};
+    } else {
+        doc[grp] = {
+            dest: doc[grp].dest,
+            destTag: doc[grp].destTag
+        }
+    }
+
+    return [doc, 'delete complete : [' + grp + ']'];
+}
+
+
+/**
+ * transfer
+ * @param from {String} Src grp
+ * @param to {String} Dst grp
+ * @param idx {String} Index of the Object
+ * @param guid {String} Id of the Object (optional)
+ */
+tra = function (doc, req) {
+    var key, cnt,
+        frm = req.form || {},
+        from = frm.from,
+        to = frm.to,
+        guid = frm.guid,
+        idx = parseInt(frm.idx, 10);
+
+    if (!doc[from] || !doc[to]) {
+        return [doc, 'transfer failed : [' + from + ' > ' + to + ']'];
+    }
+
+    if (guid) {
+        doc[to][guid] = doc[from][guid];
+        delete doc[from][guid];
+        return [doc, 'transfer complete : [' + from + ' > ' + to + ' : ' + guid + ']'];
+    }
+
+    cnt = 0;
+    for (key in doc[from]) {
+
+        if (cnt === idx || key === guid) {
+            doc[to][key] = doc[from][key];
+            delete doc[from][key];
+            break;
+        }
+
+        cnt += 1;
+    }
+
+    return [doc, 'transfer complete : [' + from + ' > ' + to + ']'];
+}
