@@ -22,7 +22,7 @@ var coffee = (function (ext) {
 
 
     //disable contextmenu for components like rotate option
-    $(d).bind("contextmenu", function(e) {
+    $(d).bind("contextmenu", function () {
         return false;
     });
 
@@ -222,6 +222,33 @@ var coffee = (function (ext) {
         }()),
 
         /**
+         * subscribe event related to document
+         * @method onDoc
+         * @param {String} event Event name like "click"
+         * @param {String} callback Callback function
+         * @return {this}
+         */
+        onDoc: (function () {
+            var handler = {};
+            $(d).bind("click", function () {
+                var that = this,
+                    args = arguments;
+
+                _.each(handler.click, function (callback) {
+                    callback.apply(that, args);
+                });
+            });
+
+            return function (event, callback) {
+                if (!handler[event]) {
+                    handler[event] = [];
+                }
+                handler[event].push(callback);
+                return this;
+            };
+        }()),
+
+        /**
          * Convert back CSS text to some how convenient form
          * @method cssConverter
          * @param {String} str Css text which is escaped by <%-
@@ -271,7 +298,7 @@ var coffee = (function (ext) {
          * @return {this}
          */
         startPolling: (function () {
-            $(d).bind('longpoll-data-' + def.project, function(evt, data) {
+            $(d).bind('longpoll-data-' + def.project, function (evt, data) {
                 var i, max,
                     cs = w.coffee.cs;
 

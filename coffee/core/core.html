@@ -6,12 +6,30 @@
 <meta name="keywords" content="">
 <meta name="description" content="">
 <link rel="stylesheet" href="../lib/jquery-ui-1.10.3.custom.min.css" media="all">
+<style type="text/css">
+* {
+    margin: 0;
+    padding: 0;
+}
+html,body{
+    height: 100%;
+}
+
+#footer{
+    bottom: 0;
+    height: 32px;
+    overflow: hidden;
+    position: absolute;
+    width: 100%;
+}
+</style>
 </head>
 <body>
 
 <div>
     <div id="menu_container"></div>
     <div id="components_container"></div>
+    <div id="footer"></div>
 </div>
 
 <!-- dependency -->
@@ -30,6 +48,7 @@
 
 <!-- components -->
 <script src="../components/component.js"></script>
+<script src="../components/contextmenu.js"></script>
 <script src="../components/menu.js"></script>
 <script src="../components/die.js"></script>
 <script src="../components/tile.js"></script>

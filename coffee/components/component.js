@@ -16,7 +16,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         sysProps = [
             "dest",
             "destTag",
-            "usr"
+            "usr",
+            "contextmenu"
         ],
 
         /**
@@ -62,7 +63,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         url: "/" + ext.def.project + "/" + ext.def.fw + "/" + name,
 
         //Backbone.Model.initialize
-        initialize: function (opt) {
+        initialize: function (opt, c) {
             opt = opt || {};
 
             if (!opt.guid) {
@@ -78,6 +79,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             if (opt) {
                 this.set(opt);
             }
+
+            this.c = c || null;
 
             if (this.init) {
                 this.init(opt);
@@ -173,6 +176,20 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             this.sendSav();
 
             return rotate;
+        },
+
+        /**
+         * show context menu
+         */
+        contextmenu: function (x, y) {
+            var contextmenu = this.c.getContextMenu();
+            contextmenu.set({
+                hide: false,
+                css_position: "absolute",
+                css_px_top: y,
+                css_px_left: x
+            });
+            contextmenu.lastModel = this;
         }
     });
 
@@ -180,10 +197,17 @@ coffee.include("Component", "components.html", [], function (name, ext) {
     c[name] = Backbone.Collection.extend({
 
         initialize: function (models, grp) {
-            this.model = ext.m[this.name];
+            // do not fix the model as context menu can be added to the collection.
+            //~ this.model = ext.m[this.name];
             this.grp = grp || "data";
             this.constructor.children[this.name] = this.constructor.children[this.name] || {};
             this.constructor.children[this.name][this.grp] = this;
+        },
+
+        getContextMenu: function () {
+            return this.filter(function (model) {
+                return model.name === "Contextmenu";
+            })[0];
         }
 
     }, {
@@ -197,7 +221,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
             $.couch.db(ext.def.project).openDoc(name, {
                 success: function (res) {
-                    var key, grpKey, modelKey, model, data, found, cssText,
+                    var key, grpKey, modelKey, model, data, found, cssText, contextmenu,
                         $layoutPos, $componentContainer;
 
                     // load css along with param stored in DB
@@ -259,11 +283,37 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                             // to check if some models r deleted
                             found = [];
 
+
+                            // first, prepare contextmenu as view will refer it
+                            contextmenu = "";
+                            if (data.contextmenu) {
+                                // add context menu only once
+                                if (!c.get("contextmenu")) {
+                                    //~ if (!data.contextmenu.guid) {
+                                        //~ data.contextmenu.guid = "contextmenu";
+                                    //~ }
+                                    if (!data.contextmenu.dest) {
+                                        data.contextmenu.dest = "body";
+                                    }
+                                    contextmenu = new ext.v.Contextmenu(data.contextmenu, c).model;
+                                    c.add(contextmenu);
+                                }
+                                found.push(contextmenu.get("guid"));
+                                contextmenu = true;
+                            }
+
+
                             // iteration for each data (models)
                             for (modelKey in data) {
                                 if (data.hasOwnProperty(modelKey)
                                         && !_.contains(sysProps, modelKey)) {
 
+                                    // let's have contextmenu parameter for later use
+                                    if (data[modelKey].contextmenu === undefined) {
+                                        data[modelKey].contextmenu = contextmenu;
+                                    }
+
+                                    // find a model it maybe exists
                                     model = c.find(function (model) {
                                         return model.get("guid") === modelKey;
                                     });
@@ -275,7 +325,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                                     } else {
                                         // model does not exist, create new
                                         if (!That.def[name] && data.dest
-                                            && (!(data.usr) || data.usr === ext.usr)) {
+                                                && (!(data.usr) || data.usr === ext.usr)) {
 
                                             model = (new ext.v[name](data[modelKey], c)).model;
 
@@ -294,6 +344,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                                 }
                             }
 
+
+                            // delete one which is no longer exist
                             _.each(c.filter(function (model) {
                                 // check if any model is deleted
                                 return !_.find(found, function (guid) {
@@ -391,6 +443,10 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
         model: null,
 
+        // default data for rendering the template
+        // override this each component implementation.
+        defData: {},
+
         // common html definition
         id: function () {
             return this.options.guid;
@@ -408,7 +464,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 this.model = opt;
 
             } else {
-                this.model = new ext.m[this.name](opt);
+                this.model = new ext.m[this.name](opt, c);
             }
 
             if (this.init) {
@@ -420,10 +476,11 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             });
 
             // appends only once
-            c.$dest.append(this.$el);
+            if (!opt.dest) {
+                c.$dest.append(this.$el);
 
-            if (this.afterRender) {
-                this.afterRender(opt);
+            } else {
+                $(opt.dest).append(this.$el);
             }
 
             this.model.bind("change", function (model) {
@@ -460,13 +517,17 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 this.$el.show();
             }
 
-            // TODO:there must be other than replacing option
-            this.$el.html(this.template(data));
+            this.$el.html(this.template(_.extend(this.defData, data)));
 
-            if (opt && opt.noAnim) {
+            if (opt && opt.noAnim
+                    || this.noAnim) {
                 this.updateStyle(true);
             } else {
                 this.updateStyle(false);
+            }
+
+            if (this.afterRender) {
+                this.afterRender(opt);
             }
 
             return this;
@@ -490,7 +551,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 });
 
             _.each(styleKeys, function (key) {
-                var cssKey = key.replace(/(^css)|(_px_)/g, "");
+                var cssKey = key.replace(/^css_/, "");
+                cssKey = cssKey.replace(/^px_/, "");
 
                 css[cssKey] = attrs[key];
                 if (_.contains(pxSuffixKeys, key)) {
@@ -511,7 +573,9 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         initOpt: function () {
             this.events = this.events || {};
 
-            if (this.model.get("rotate")) {
+            if (this.model.get("contextmenu")
+                    || this.model.get("rotate")) {
+
                 this.events.mousedown = "mousedown";
             }
 
@@ -526,7 +590,13 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         mousedown: function (e) {
             if (e.which === 3) {
                 //right click
-                this.model.rotate();
+                if (this.model.get("contextmenu")) {
+                    this.model.contextmenu(e.clientX, e.clientY);
+
+                } else if (this.model.get("rotate")) {
+                    this.model.rotate();
+                }
+
                 e.preventDefault();
                 return false;
             }
@@ -538,6 +608,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
             // enable drag and drop
             $el.draggable()
+                .css("position", "absolute")
                 .addClass("draggable")
                 .bind("dragstop", function (e, ui) {
                     that.model.set({

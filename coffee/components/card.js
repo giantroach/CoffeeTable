@@ -1,7 +1,7 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global coffee */
 
-coffee.include("Card", "card.html", ["Component"], function (name, ext) {
+coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name, ext) {
     "use strict";
 
     var $ = ext.$,
@@ -82,6 +82,10 @@ coffee.include("Card", "card.html", ["Component"], function (name, ext) {
 
     // View
     v[name] = ext.v.Component.extend({
+        defData: {
+            title: "",
+            text: ""
+        }
     });
 
 
