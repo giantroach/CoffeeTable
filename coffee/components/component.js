@@ -145,8 +145,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          */
         sendTra: function (to, suc, err) {
             send.call(this, "tra", this.name, {
-                grp: this.get("grp"),
-                id: this.get("guid"),
+                guid: this.get("guid"),
+                from: this.get("grp"),
                 to: to
             }, suc, err);
             return this;

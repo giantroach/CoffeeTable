@@ -249,6 +249,36 @@ var coffee = (function (ext) {
         }()),
 
         /**
+         * subscribe window resize event.
+         * @method onResize
+         * @param callback {Function}
+         * @return {this}
+         */
+        onResize: (function () {
+            var timeout,
+                handlers = [];
+
+            $(w).resize(function () {
+                var that = this,
+                    args = arguments;
+
+                clearTimeout(timeout);
+                timeout = w.setTimeout(function () {
+                    _.each(handlers, function (callback) {
+                        //callback gets args of
+                        // x(width), y(height), original-args
+                        callback.apply(that, _.union([that.innerWidth, that.innerHeight], args));
+                    });
+                }, 100);
+            });
+
+            return function (callback) {
+                handlers.push(callback);
+                return this;
+            };
+        }()),
+
+        /**
          * Convert back CSS text to some how convenient form
          * @method cssConverter
          * @param {String} str Css text which is escaped by <%-
@@ -338,7 +368,9 @@ var coffee = (function (ext) {
             }
 
             this.c.Login.start(function () {
-                that.startPolling();
+                that.c.Frame.setup(function () {
+                    that.startPolling();
+                });
             });
 
             return this;

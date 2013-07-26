@@ -22,14 +22,6 @@ coffee.include("Login", "../core/login.html", [], function (name, ext) {
     // Collection
     c[name] = Backbone.Collection.extend({
         $dest: $("body")
-
-        //~ initialize: function (models, grp) {
-            //~ this.model = ext.m[this.name];
-            //~ this.grp = grp || "data";
-            //~ this.constructor.children[this.name] = this.constructor.children[this.name] || {};
-            //~ this.constructor.children[this.name][this.grp] = this;
-        //~ }
-
     }, {
 
         //start
@@ -52,9 +44,7 @@ coffee.include("Login", "../core/login.html", [], function (name, ext) {
             // bind model to the view
             this.model = new ext.m[this.name](opt);
 
-            this.render(this.model.attributes, {
-                noAnim: true
-            });
+            this.render();
 
             // appends only once
             c.$dest.append(this.$el);
@@ -102,5 +92,4 @@ coffee.include("Login", "../core/login.html", [], function (name, ext) {
         r : r[name],
         v : v[name]
     };
-
 });
