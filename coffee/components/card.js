@@ -17,6 +17,13 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
      * Model
      */
     m[name] = ext.m.Component.extend({
+        play: function () {
+            this.sendTra("play");
+        },
+        discard: function () {
+            this.sendDel();
+            return this;
+        }
     });
 
     // Collection

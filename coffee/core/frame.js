@@ -15,7 +15,9 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         $center,
         $header,
         $left,
+        $left_proxy,
         $right,
+        $right_proxy,
         $footer,
 
         adjustMargin = function (width, height) {
@@ -37,46 +39,80 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
                 height: height - (48 * 2) + "px",
                 margin: "48px 0"
             });
+            $left_proxy.css({
+                height: height - (48 * 2) + "px",
+                margin: "48px 0"
+            });
             $right.css({
+                height: height - (48 * 2) + "px",
+                margin: "48px 0"
+            });
+            $right_proxy.css({
                 height: height - (48 * 2) + "px",
                 margin: "48px 0"
             });
         },
 
         startResizeHandling = function () {
-            var targets = ["header", "left", "right", "footer"],
-                $targets;
-
             $center = $("#center");
             $header = $("#header");
             $left = $("#left");
+            $left_proxy = $("#left_proxy");
             $right = $("#right");
+            $right_proxy = $("#right_proxy");
             $footer = $("#footer");
 
-            $targets = {
-                header: $header,
-                left: $left,
-                right: $right,
-                footer: $footer
-            };
-
-            _.each($targets, function ($target) {
-                $target.bind("mouseover", function () {
-                    $(this).fadeTo(200, 1);
-                    _.each(_.omit($targets, this.id), function ($target) {
-                        $target.fadeTo(200, 0.25);
-                    });
-                });
-                $target.bind("mouseout", function (args) {
-                    if (args.relatedTarget !== this
-                            && !$(args.relatedTarget).parents("#" + this.id).length) {
-
-                        $target.fadeTo(200, 0.25);
-                    }
-                });
-
-                $target.fadeTo(200, 0.25);
+            // left
+            $left_proxy.bind("mouseover", function () {
+                $left.fadeIn(200);
             });
+            $left.bind("mouseout", function (args) {
+                if (args.relatedTarget !== this
+                        && !$(args.relatedTarget).parents("#" + this.id).length) {
+
+                    $left.fadeOut(200);
+                }
+            });
+            $left.hide();
+
+            // right
+            $right_proxy.bind("mouseover", function () {
+                $right.fadeIn(200);
+            });
+            $right.bind("mouseout", function (args) {
+                if (args.relatedTarget !== this
+                        && !$(args.relatedTarget).parents("#" + this.id).length) {
+
+                    $right.fadeOut(200);
+                }
+            });
+            $right.hide();
+
+            // header
+            $header.bind("mouseover", function () {
+                $(this).fadeTo(200, 1);
+            });
+            $header.bind("mouseout", function (args) {
+                if (args.relatedTarget !== this
+                        && !$(args.relatedTarget).parents("#" + this.id).length) {
+
+                    $header.fadeTo(200, 0.5);
+                }
+            });
+            $header.fadeTo(200, 0.5);
+
+            // footer
+            $footer.bind("mouseover", function () {
+                $(this).fadeTo(200, 1);
+            });
+            $footer.bind("mouseout", function (args) {
+                if (args.relatedTarget !== this
+                        && !$(args.relatedTarget).parents("#" + this.id).length) {
+
+                    $footer.fadeTo(200, 0.5);
+                }
+            });
+            $footer.fadeTo(200, 0.5);
 
             ext.onResize(adjustMargin);
             adjustMargin();
@@ -94,10 +130,10 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         $dest: $("body")
     }, {
         setup: function (callback) {
-            var c = new this(),
-                m = (new ext.v[name]({}, c)).model;
+            var col = new this(),
+                mod = (new ext.v[name]({}, col)).model;
 
-            c.add(m);
+            col.add(mod);
             callback();
         }
     });
