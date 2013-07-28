@@ -139,15 +139,17 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * Send transfer data to the server
          * @method sendTra
          * @param {String} to Destination grp
+         * @param {Object} override (optional)
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
          */
-        sendTra: function (to, suc, err) {
+        sendTra: function (to, override, suc, err) {
             send.call(this, "tra", this.name, {
                 guid: this.get("guid"),
                 from: this.get("grp"),
-                to: to
+                to: to,
+                override: override || {}
             }, suc, err);
             return this;
         },

@@ -18,7 +18,9 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
      */
     m[name] = ext.m.Component.extend({
         play: function () {
-            this.sendTra("play");
+            this.sendTra("play", {
+                draggable: true
+            });
         },
         discard: function () {
             this.sendDel();
