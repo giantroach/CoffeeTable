@@ -139,18 +139,17 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * Send transfer data to the server
          * @method sendTra
          * @param {String} to Destination grp
-         * @param {Object} override (optional)
+         * @param {Object} data Any extra data to send (optional)
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
          */
-        sendTra: function (to, override, suc, err) {
-            send.call(this, "tra", this.name, {
+        sendTra: function (to, data, suc, err) {
+            send.call(this, "tra", this.name, _.extend(data || {}, {
                 guid: this.get("guid"),
                 from: this.get("grp"),
-                to: to,
-                override: override || {}
-            }, suc, err);
+                to: to
+            }), suc, err);
             return this;
         },
 
@@ -197,7 +196,6 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
     // Collection
     c[name] = Backbone.Collection.extend({
-
         initialize: function (models, grp) {
             // do not fix the model as context menu can be added to the collection.
             //~ this.model = ext.m[this.name];
@@ -213,6 +211,14 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         }
 
     }, {
+        isMine: (function () {
+            var rx = new RegExp("(^[^\$]+$)|(_\$[^.+]\$$)|(_\$" + ext.usr + ")$");
+            
+            return function () {
+                return rx.test(arguments)
+            }
+        }()),
+
         /**
          * Send query to iterate and refresh all belonging models
          */
@@ -223,7 +229,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
             $.couch.db(ext.def.project).openDoc(name, {
                 success: function (res) {
-                    var key, grpKey, modelKey, model, data, found, cssText, contextmenu,
+                    var key, grpKey, rawGrpKey, bindedGrpKey,
+                        modelKey, model, data, found, cssText, contextmenu, contextmenuData,
                         $layoutPos, $componentContainer;
 
                     // load css along with param stored in DB
@@ -257,16 +264,31 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                     for (grpKey in res) {
                         if (res.hasOwnProperty(grpKey)
                                 && grpKey[0] !== "_"
-                                && grpKey[0] !== "$") {
+                                && grpKey[0] !== "$"
+                                && That.isMine(grpKey)) {
 
+                            // grp key has several naming rule.
+                            // treat them as A group.
                             data = res[grpKey];
+                            // remove user
+                            rawGrpKey = grpKey;
+                            //~ rawGrpKey = grpKey.replace(/_\$[^$]+$/g, "");
+                            //~ if (grpKey !== rawGrpKey && res[rawGrpKey]) {
+                                //~ _.extend(data, res[rawGrpKey]);
+                                //~ delete res[rawGrpKey];
+                            //~ }
+                            //~ bindedGrpKey = rawGrpKey + "_$" + ext.usr;
+                            //~ if (grpKey !== bindedGrpKey && res[bindedGrpKey]) {
+                                //~ _.extend(data, res[bindedGrpKey]);
+                                //~ delete res[bindedGrpKey];
+                            //~ }
 
                             // if collection is not created, create it here now!
                             if (That.children[name]) {
-                                c = That.children[name][grpKey];
+                                c = That.children[name][rawGrpKey];
                             }
                             if (!c) {
-                                c = new That([], grpKey);
+                                c = new That([], rawGrpKey);
 
                                 $layoutPos = $("#" + data.dest);
                                 $componentContainer = $layoutPos.children("." + name);
@@ -275,9 +297,10 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                                         .appendTo($layoutPos);
                                 }
 
-                                c.$dest = $componentContainer.children("." + grpKey);
+                                // $ (used for state) is prohibited to use for jQuery
+                                c.$dest = $componentContainer.children("." + rawGrpKey.replace(/\$/g, ""));
                                 if (!c.$dest || !c.$dest.length) {
-                                    c.$dest = $('<' + (data.destTag || 'div') + ' class="' + grpKey + '"></div>')
+                                    c.$dest = $('<' + (data.destTag || c.destTag || 'div') + ' class="' + rawGrpKey.replace(/\$/g, "") + '"></div>')
                                         .appendTo($componentContainer);
                                 }
                             }
@@ -288,16 +311,15 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
                             // first, prepare contextmenu as view will refer it
                             contextmenu = "";
-                            if (data.contextmenu) {
+                            contextmenuData = data.contextmenu || c.contextmenu;
+                            if (contextmenuData) {
                                 // add context menu only once
-                                if (!c.get("contextmenu")) {
-                                    //~ if (!data.contextmenu.guid) {
-                                        //~ data.contextmenu.guid = "contextmenu";
-                                    //~ }
-                                    if (!data.contextmenu.dest) {
-                                        data.contextmenu.dest = "body";
+                                contextmenu = c.getContextMenu();
+                                if (!contextmenu) {
+                                    if (!contextmenuData.dest) {
+                                        contextmenuData.dest = "body";
                                     }
-                                    contextmenu = new ext.v.Contextmenu(data.contextmenu, c).model;
+                                    contextmenu = new ext.v.Contextmenu(contextmenuData, c).model;
                                     c.add(contextmenu);
                                 }
                                 found.push(contextmenu.get("guid"));

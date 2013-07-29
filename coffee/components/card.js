@@ -1,6 +1,11 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global coffee */
 
+// grp > not in play (like deck)
+// grp_$user > binded to the user (like hand)
+// grp_$state$ > card is in a "state" and not binded to any user
+// grp_$state$_$user > card is in a "state" also binded to the user (played face-down)
+
 coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name, ext) {
     "use strict";
 
@@ -18,18 +23,65 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
      */
     m[name] = ext.m.Component.extend({
         play: function () {
-            this.sendTra("play", {
-                draggable: true
+            var grp = this.get("grp")
+                    .replace(/_\$[^$]+$/g, "") // remove user
+                    .replace(/_\$[^$]+\$/g, "") // remove state
+                    + "_$" + "played" + "$"; // add "played" state
+
+            if (grp === this.get("grp")) {
+                return;
+            }
+
+            this.sendTra(grp, {
+                override: {
+                    draggable: true
+                },
+                dest: "center"
             });
         },
+
         discard: function () {
             this.sendDel();
             return this;
+        },
+
+        take: function () {
+            var grp = this.get("grp")
+                    .replace(/_\$[^$]+$/g, "") // remove user
+                    .replace(/_\$[^$]+\$/g, "") // remove state
+                    + "_$" + ext.usr;
+
+            if (grp === this.get("grp")) {
+                return;
+            }
+
+            this.sendTra(grp, {
+                override: {
+                    draggable: ""
+                },
+                dest: "footer"
+            });
         }
     });
 
     // Collection
     c[name] = ext.c.Component.extend({
+        contextmenu: {
+            items: [
+                {
+                    label: "play",
+                    callback: "play"
+                },
+                {
+                    label: "discard",
+                    callback: "discard"
+                },
+                {
+                    label: "take",
+                    callback: "take"
+                }
+            ]
+        }
     }, {
         default_def: {
         },
@@ -42,7 +94,7 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
         shuffle: function (grp) {
             var i, max,
                 that = this,
-                name = this.prototype.name,
+                //~ name = this.prototype.name,
                 models = [],
                 templates = _.extend([], this.def.templates[grp]);
 
