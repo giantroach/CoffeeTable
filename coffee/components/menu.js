@@ -1,6 +1,18 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global coffee */
 
+
+/**
+ * Menu definition format
+ * <p>"click"<p>
+ * <ul>
+ * <li>"component": Component name</li>
+ * <li>"method": Method name (collection)</li>
+ * <li>"args": Arguments array</li>
+ * </ul>
+ */
+
+
 coffee.include("Menu", "menu.html", ["Component"], function (name, ext) {
     "use strict";
 
@@ -21,6 +33,10 @@ coffee.include("Menu", "menu.html", ["Component"], function (name, ext) {
 
     // Collection
     c[name] = ext.c.Component.extend({
+        destTag: "ul",
+        afterRefresh: function () {
+            this.$dest.menu();
+        }
     });
 
     // View
@@ -38,17 +54,12 @@ coffee.include("Menu", "menu.html", ["Component"], function (name, ext) {
         },
 
         hndlEvent: function (e) {
-            var handler = this.model.get(e.type);
+            var component,
+                handler = this.model.get(e.type);
 
             if (handler) {
-                ext.c[
-                    handler.component
-                ][
-                    handler.method
-                ](
-                    handler.grp,
-                    handler.args
-                );
+                component = ext.c[handler.component];
+                component[handler.method].apply(component, handler.args);
             }
         }
     });
