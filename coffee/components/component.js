@@ -198,7 +198,6 @@ coffee.include("Component", "components.html", [], function (name, ext) {
     c[name] = Backbone.Collection.extend({
         initialize: function (models, grp) {
             // do not fix the model as context menu can be added to the collection.
-            //~ this.model = ext.m[this.name];
             this.grp = grp || "data";
             this.constructor.children[this.name] = this.constructor.children[this.name] || {};
             this.constructor.children[this.name][this.grp] = this;
@@ -272,16 +271,6 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                             data = res[grpKey];
                             // remove user
                             rawGrpKey = grpKey;
-                            //~ rawGrpKey = grpKey.replace(/_\$[^$]+$/g, "");
-                            //~ if (grpKey !== rawGrpKey && res[rawGrpKey]) {
-                                //~ _.extend(data, res[rawGrpKey]);
-                                //~ delete res[rawGrpKey];
-                            //~ }
-                            //~ bindedGrpKey = rawGrpKey + "_$" + ext.usr;
-                            //~ if (grpKey !== bindedGrpKey && res[bindedGrpKey]) {
-                                //~ _.extend(data, res[bindedGrpKey]);
-                                //~ delete res[bindedGrpKey];
-                            //~ }
 
                             // if collection is not created, create it here now!
                             if (That.children[name]) {
@@ -380,6 +369,10 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                                 // one which deleted
                                 model.destroy();
                             });
+
+                            if (c.afterRefresh) {
+                                c.afterRefresh();
+                            }
 
                         }
                     }

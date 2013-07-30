@@ -15,18 +15,41 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
         m = {},
         c = {},
         r = {},
-        v = {};
+        v = {},
+
+        /**
+         * @method genNewGrpStr
+         * @param {String} grp
+         * @param {Object} param
+         */
+        genNewGrpStr = function (grp, param) {
+            grp = grp
+                .replace(/_\$[^$]+$/g, "") // remove user
+                .replace(/_\$[^$]+\$/g, ""); // remove state;
+
+            if (param && param.state) {
+                grp += ("_$" + param.state + "$");
+            }
+            if (param && param.usr) {
+                grp += ("_$" + param.usr);
+            }
+
+            return grp;
+        };
 
 
     /**
      * Model
      */
     m[name] = ext.m.Component.extend({
+        genNewGrpStr: function (param) {
+            return genNewGrpStr(this.get("grp"), param);
+        },
+
         play: function () {
-            var grp = this.get("grp")
-                    .replace(/_\$[^$]+$/g, "") // remove user
-                    .replace(/_\$[^$]+\$/g, "") // remove state
-                    + "_$" + "played" + "$"; // add "played" state
+            var grp = this.genNewGrpStr({
+                state: "played"
+            });
 
             if (grp === this.get("grp")) {
                 return;
@@ -41,15 +64,28 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
         },
 
         discard: function () {
+            var grp = this.genNewGrpStr({
+                state: "discarded"
+            });
+
+            if (grp === this.get("grp")) {
+                return;
+            }
+
+            this.sendTra(grp, {
+                override: {
+                    draggable: ""
+                },
+                dest: ""
+            });
             this.sendDel();
             return this;
         },
 
         take: function () {
-            var grp = this.get("grp")
-                    .replace(/_\$[^$]+$/g, "") // remove user
-                    .replace(/_\$[^$]+\$/g, "") // remove state
-                    + "_$" + ext.usr;
+            var grp = this.genNewGrpStr({
+                usr: ext.usr
+            });
 
             if (grp === this.get("grp")) {
                 return;
@@ -88,13 +124,41 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
 
         /**
          * Reset target deck
+         * @method resetDeck
+         * @param {String} grp
+         */
+        resetDeck: function (grp) {
+            var i, max,
+                that = this,
+                models = [],
+                templates = _.extend([], this.def.templates[grp]);
+
+            templates = _.shuffle(templates);
+            for (i = 0, max = templates.length; i < max; i += 1) {
+                models.push(
+                    (new ext.m[name]())
+                        .set(_.extend({
+                            grp: grp
+                        }, templates[i]))
+                );
+            }
+            ext.c[name].children[name][grp].reset(models);
+
+            this.updateAll("delAll", grp, null, function () {
+                that.updateAll("savAll", grp);
+            });
+
+            return this;
+        },
+
+        /**
+         * Put all discarded cards into a deck and shuffle again
          * @method reset
          * @param {String} grp
          */
-        shuffle: function (grp) {
+        reShuffle: function (grp) {
             var i, max,
                 that = this,
-                //~ name = this.prototype.name,
                 models = [],
                 templates = _.extend([], this.def.templates[grp]);
 
@@ -119,23 +183,41 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
         /**
          * draw
          * @method draw
-         * @param {String} from
-         * @param {String} to
+         * @param {String} from grp
+         * @param {String} to (optional) if not specified, u draw to ur hand
          * @param {Number} idx(optional)
          * @param {Function} suc
          * @param {Function} err
          * @return {this}
          */
         draw: function (from, to, idx, suc, err) {
+            var data = {};
+
             if (idx === undefined) {
                 idx = 0;
             }
 
-            this.send("tra", this.prototype.name, {
+            if (!to) {
+                to = genNewGrpStr(from, {
+                    usr: ext.usr
+                });
+
+                data = {
+                    dest: "footer"
+                };
+            }
+
+            if (from === to) {
+                return;
+            }
+
+            _.extend(data, {
                 from: from,
                 to: to,
                 idx: idx
-            }, suc, err);
+            });
+
+            this.send("tra", name, data, suc, err);
 
             return this;
         }
