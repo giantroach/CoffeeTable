@@ -31,6 +31,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          */
         send = function (df, name, data, suc, err) {
             var that = this;
+            data.nm = ext.usr;
 
             $.ajax({
                 type: "POST",
@@ -100,19 +101,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         },
 
         /**
-         * Send add data to the server
-         * @method sendAdd
-         * @param {Function} suc Callback for success (optional)
-         * @param {Function} err Callback for error (optional)
-         * @return {this}
-         */
-        sendAdd: function (suc, err) {
-            send.call(this, "add", this.name, this.attributes, suc, err);
-            return this;
-        },
-
-        /**
-         * Send add data to the server
+         * Send save data to the server
          * @method sendSav
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
@@ -212,10 +201,10 @@ coffee.include("Component", "components.html", [], function (name, ext) {
     }, {
         isMine: (function () {
             var rx = new RegExp("(^[^\$]+$)|(_\$[^.+]\$$)|(_\$" + ext.usr + ")$");
-            
+
             return function () {
-                return rx.test(arguments)
-            }
+                return rx.test(arguments);
+            };
         }()),
 
         /**
@@ -228,8 +217,9 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
             $.couch.db(ext.def.project).openDoc(name, {
                 success: function (res) {
-                    var key, grpKey, rawGrpKey, bindedGrpKey,
-                        modelKey, model, data, found, cssText, contextmenu, contextmenuData,
+                    var i, max,
+                        key, grpKey, rawGrpKey,
+                        model, data, found, cssText, contextmenu, contextmenuData,
                         $layoutPos, $componentContainer;
 
                     // load css along with param stored in DB
@@ -317,44 +307,44 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
 
                             // iteration for each data (models)
-                            for (modelKey in data) {
-                                if (data.hasOwnProperty(modelKey)
-                                        && !_.contains(sysProps, modelKey)) {
+                            if (!data.data) {
+                                data.data = [];
+                            }
+                            for (i = 0, max = data.data.length; i < max; i += 1) {
 
-                                    // let's have contextmenu parameter for later use
-                                    if (data[modelKey].contextmenu === undefined) {
-                                        data[modelKey].contextmenu = contextmenu;
-                                    }
+                                // let's have contextmenu parameter for later use
+                                if (data.data[i].contextmenu === undefined) {
+                                    data.data[i].contextmenu = contextmenu;
+                                }
 
-                                    // find a model it maybe exists
-                                    model = c.find(function (model) {
-                                        return model.get("guid") === modelKey;
-                                    });
+                                // find a model it maybe exists
+                                model = c.find(function (model) {
+                                    return model.get("guid") === data.data[i].guid;
+                                });
 
-                                    if (model) {
-                                        // model exists, refresh the information
-                                        model.refresh(data[modelKey]);
+                                if (model) {
+                                    // model exists, refresh the information
+                                    model.refresh(data.data[i]);
+
+                                } else {
+                                    // model does not exist, create new
+                                    if (!That.def[name] && data.dest
+                                            && (!(data.usr) || data.usr === ext.usr)) {
+
+                                        model = (new ext.v[name](data.data[i], c)).model;
 
                                     } else {
-                                        // model does not exist, create new
-                                        if (!That.def[name] && data.dest
-                                                && (!(data.usr) || data.usr === ext.usr)) {
-
-                                            model = (new ext.v[name](data[modelKey], c)).model;
-
-                                        } else {
-                                            // if dest is not defined, just create model instead of view with model
-                                            model = new ext.m[name](data[modelKey], c);
-                                        }
-                                        model.set("grp", grpKey, {
-                                            // silent to avoid view to re-render
-                                            silent: true
-                                        });
-                                        c.add(model);
+                                        // if dest is not defined, just create model instead of view with model
+                                        model = new ext.m[name](data.data[i], c);
                                     }
-
-                                    found.push(modelKey);
+                                    model.set("grp", grpKey, {
+                                        // silent to avoid view to re-render
+                                        silent: true
+                                    });
+                                    c.add(model);
                                 }
+
+                                found.push(model.get("guid"));
                             }
 
 
@@ -394,6 +384,21 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          */
         send: function () {
             send.apply(this, arguments);
+            return this;
+        },
+
+        /**
+         * Send shuffle request to the server
+         * @method sendShu
+         * @param {String} grp
+         * @param {Function} suc Callback for success (optional)
+         * @param {Function} err Callback for error (optional)
+         * @return {this}
+         */
+        sendShu: function (grp, suc, err) {
+            send.call(this, "shu", this.prototype.name, {
+                grp: grp
+            }, suc, err);
             return this;
         },
 
@@ -536,8 +541,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
             this.$el.html(this.template(_.extend(this.defData, data)));
 
-            if (opt && opt.noAnim
-                    || this.noAnim) {
+            if ((opt && opt.noAnim) || this.noAnim) {
                 this.updateStyle(true);
             } else {
                 this.updateStyle(false);
