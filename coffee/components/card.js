@@ -122,11 +122,28 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
         },
 
         /**
+         * @method resetDeck
+         * @param {String} grp
+         * @return {this}
+         */
+        resetDeck: function (grp) {
+            var that = this;
+
+            this.sendTraBac(grp, null, function () {
+                that.sendResTem(grp, function () {
+                    that.sendShu(grp);
+                });
+            })
+        },
+
+        /**
          * Reset target deck
          * @method resetDeck
          * @param {String} grp
+         * @param {shuffle}
+         * @return {this}
          */
-        resetDeck: function (grp, shuffle) {
+        shuffleIntoDeck: function (grp, shuffle) {
             var i, max,
                 that = this,
                 models = [],
@@ -134,7 +151,7 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
 
             this.sendTraBac(grp, null, function () {
                 if (shuffle || shuffle === undefined) {
-                    that.sendShu("savAll", grp);
+                    that.sendShu(grp);
                 }
             });
 
@@ -152,46 +169,8 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
             return this;
         },
 
-        /**
-         * draw
-         * @method draw
-         * @param {String} from grp
-         * @param {String} to (optional) if not specified, u draw to ur hand
-         * @param {Number} idx(optional)
-         * @param {Function} suc
-         * @param {Function} err
-         * @return {this}
-         */
-        draw: function (from, to, idx, suc, err) {
-            var data = {};
-
-            if (idx === undefined) {
-                idx = 0;
-            }
-
-            if (!to) {
-                to = genNewGrpStr(from, {
-                    usr: ext.usr
-                });
-
-                data = {
-                    dest: "footer"
-                };
-            }
-
-            if (from === to) {
-                return;
-            }
-
-            _.extend(data, {
-                from: from,
-                to: to,
-                idx: idx
-            });
-
-            this.send("tra", name, data, suc, err);
-
-            return this;
+        draw: function () {
+            this.take.apply(this, arguments);
         },
 
         /**

@@ -23,6 +23,26 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         ],
 
         /**
+         * @method genNewGrpStr
+         * @param {String} grp
+         * @param {Object} param
+         */
+        genNewGrpStr = function (grp, param) {
+            grp = grp
+                .replace(/_\$[^$]+$/g, "") // remove user
+                .replace(/_\$[^$]+\$/g, ""); // remove state;
+
+            if (param && param.state) {
+                grp += ("_$" + param.state + "$");
+            }
+            if (param && param.usr) {
+                grp += ("_$" + param.usr);
+            }
+
+            return grp;
+        },
+
+        /**
          * Send update data to the server
          * @method send
          * @paarm {String} df Design document function (ins/add/sav/del/tra)
@@ -401,6 +421,48 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             send.call(this, "shu", this.prototype.name, {
                 grp: grp
             }, suc, err);
+            return this;
+        },
+
+        /**
+         * take
+         * @method take
+         * @param {String} from grp
+         * @param {String} to (optional) if not specified, u draw to ur hand
+         * @param {Number} idx(optional)
+         * @param {Function} suc
+         * @param {Function} err
+         * @return {this}
+         */
+        take: function (from, to, idx, suc, err) {
+            var data = {};
+
+            if (idx === undefined) {
+                idx = 0;
+            }
+
+            if (!to) {
+                to = genNewGrpStr(from, {
+                    usr: ext.usr
+                });
+
+                data = {
+                    dest: "footer"
+                };
+            }
+
+            if (from === to) {
+                return;
+            }
+
+            _.extend(data, {
+                from: from,
+                to: to,
+                idx: idx
+            });
+
+            this.send("tra", this.prototype.name, data, suc, err);
+
             return this;
         },
 
