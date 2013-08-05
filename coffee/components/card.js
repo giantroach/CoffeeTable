@@ -78,7 +78,6 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
                 },
                 dest: ""
             });
-            this.sendDel();
             return this;
         },
 
@@ -191,6 +190,44 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
             });
 
             this.send("tra", name, data, suc, err);
+
+            return this;
+        },
+
+        /**
+         * draw init card, and refill the init deck
+         * @method initDraw
+         * @param {String} from grp
+         * @param {String} to (optional) if not specified, u draw to ur hand
+         * @param {Object} override(optional)
+         * @param {Function} suc
+         * @param {Function} err
+         * @return {this}
+         */
+        initDraw: function (from, to, override, suc, err) {
+            var data = {},
+                that = this;
+
+            if (!to) {
+                to = genNewGrpStr(from, {
+                    usr: ext.usr
+                });
+            }
+
+            if (!override) {
+                override = {};
+            }
+
+            if (from === to) {
+                return;
+            }
+
+            this.sendResTem(from, function () {
+                that.sendTraAll(from, to, {
+                    dest: "footer",
+                    override: override
+                }, suc, err);
+            }, err);
 
             return this;
         }

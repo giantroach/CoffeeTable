@@ -74,7 +74,8 @@ var coffee = (function (ext) {
             }
 
             // set delay if module defined some dependencies
-            if (_.find(loading, function (module) { return _.contains(dependencies, module); })) {
+            if (_.find(loading, function (module) { return _.contains(dependencies, module); })
+                    || (dependencies.length && dependencies.length !== _.filter(dependencies, function (module) { return _.contains(_.keys(that.m), module) }).length)) {
                 setTimeout(function () {
                     that.include.apply(that, args);
                 }, 100);
