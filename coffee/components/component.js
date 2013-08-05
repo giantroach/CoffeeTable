@@ -200,7 +200,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
     }, {
         isMine: (function () {
-            var rx = new RegExp("(^[^\$]+$)|(_\$[^.+]\$$)|(_\$" + ext.usr + ")$");
+            var rx = new RegExp("(^[^\\$]+$)|(_\\$[^.+]\\$$)|(_\\$" + ext.usr + ")$");
 
             return function () {
                 return rx.test(arguments);
@@ -398,6 +398,42 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         sendShu: function (grp, suc, err) {
             send.call(this, "shu", this.prototype.name, {
                 grp: grp
+            }, suc, err);
+            return this;
+        },
+
+        /**
+         * Transfer multiple targes
+         * @method sendTraAll
+         * @param {String} from
+         * @param {String} to
+         * @param {String[]} guids
+         * @param {Function} suc Callback for success (optional)
+         * @param {Function} err Callback for error (optional)
+         * @return {this}
+         */
+        sendTraAll: function (from, to, guids, suc, err) {
+            send.call(this, "traAll", this.prototype.name, {
+                from: from,
+                to: to,
+                guids: guids
+            }, suc, err);
+            return this;
+        },
+
+        /**
+         * Transfer back all suffixed grp
+         * @method sendTraAll
+         * @param {String} grp
+         * @param {String} override (optional)
+         * @param {Function} suc Callback for success (optional)
+         * @param {Function} err Callback for error (optional)
+         * @return {this}
+         */
+        sendTraBac: function (grp, override, suc, err) {
+            send.call(this, "traBac", this.prototype.name, {
+                grp: grp,
+                override: override
             }, suc, err);
             return this;
         },

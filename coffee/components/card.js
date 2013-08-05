@@ -127,25 +127,16 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
          * @method resetDeck
          * @param {String} grp
          */
-        resetDeck: function (grp) {
+        resetDeck: function (grp, shuffle) {
             var i, max,
                 that = this,
                 models = [],
                 templates = _.extend([], this.def.templates[grp]);
 
-            templates = _.shuffle(templates);
-            for (i = 0, max = templates.length; i < max; i += 1) {
-                models.push(
-                    (new ext.m[name]())
-                        .set(_.extend({
-                            grp: grp
-                        }, templates[i]))
-                );
-            }
-            ext.c[name].children[name][grp].reset(models);
-
-            this.updateAll("delAll", grp, null, function () {
-                that.updateAll("savAll", grp);
+            this.sendTraBac(grp, null, function () {
+                if (shuffle || shuffle === undefined) {
+                    that.sendShu("savAll", grp);
+                }
             });
 
             return this;
@@ -153,29 +144,11 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
 
         /**
          * Put all discarded cards into a deck and shuffle again
-         * @method reset
+         * @method reShuffle
          * @param {String} grp
          */
         reShuffle: function (grp) {
-            var i, max,
-                that = this,
-                models = [],
-                templates = _.extend([], this.def.templates[grp]);
-
-            templates = _.shuffle(templates);
-            for (i = 0, max = templates.length; i < max; i += 1) {
-                models.push(
-                    (new ext.m[name]())
-                        .set(_.extend({
-                            grp: grp
-                        }, templates[i]))
-                );
-            }
-            ext.c[name].children[name][grp].reset(models);
-
-            this.updateAll("delAll", grp, null, function () {
-                that.updateAll("savAll", grp);
-            });
+            this.sendTraAll(grp + "_$discarded$", grp);
 
             return this;
         },
