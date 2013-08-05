@@ -12,6 +12,9 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         r = {},
         v = {},
 
+        left_pin = "off",
+        right_pin = "off",
+
         $center,
         $header,
         $left,
@@ -21,17 +24,29 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         $footer,
 
         adjustMargin = function (width, height) {
+            var leftMargin, rightMargin;
+            
             if (!width) {
                 width = ext.w.innerWidth;
             }
             if (!height) {
                 height = ext.w.innerHeight;
             }
+            if (left_pin === "on") {
+                leftMargin = 192;
+            } else {
+                leftMargin = 48;
+            }
+            if (right_pin === "on") {
+                rightMargin = 192;
+            } else {
+                rightMargin = 48;
+            }
 
             $center.css({
                 height: height - (48 * 2) + "px",
-                width: width - (48 * 2) + "px",
-                margin: "48px",
+                width: width - (leftMargin + rightMargin) + "px",
+                margin: "48px " + rightMargin + "px 48px " + leftMargin + "px",
                 overflow: "auto"
             });
 
@@ -69,7 +84,8 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
                 $left.fadeIn(200);
             });
             $left.bind("mouseout", function (args) {
-                if (args.relatedTarget !== this
+                if (left_pin === "off"
+                        && args.relatedTarget !== this
                         && !$(args.relatedTarget).parents("#" + this.id).length) {
 
                     $left.fadeOut(200);
@@ -82,7 +98,8 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
                 $right.fadeIn(200);
             });
             $right.bind("mouseout", function (args) {
-                if (args.relatedTarget !== this
+                if (right_pin === "off"
+                        && args.relatedTarget !== this
                         && !$(args.relatedTarget).parents("#" + this.id).length) {
 
                     $right.fadeOut(200);
@@ -147,6 +164,10 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
 
     // View
     v[name] = Backbone.View.extend({
+        events: {
+            "click": "click"
+        },
+
         initialize: function (opt, c) {
             var that = this;
 
@@ -169,6 +190,36 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
 
         render: function () {
             this.$el = $(this.template());
+        },
+
+        click: function (args) {
+            if (args.target.id === "left_pin") {
+                if (left_pin === "off") {
+                    left_pin = "on";
+                    $(args.target).removeClass("pin_off").addClass("pin_on");
+                    adjustMargin();
+                    return;
+                }
+
+                left_pin = "off";
+                $(args.target).removeClass("pin_on").addClass("pin_off");
+                adjustMargin();
+                return;
+            }
+
+            if (args.target.id === "right_pin") {
+                if (left_pin === "off") {
+                    right_pin = "on";
+                    $(args.target).removeClass("pin_off").addClass("pin_on");
+                    adjustMargin();
+                    return;
+                }
+
+                right_pin = "off";
+                $(args.target).removeClass("pin_on").addClass("pin_off");
+                adjustMargin();
+                return;
+            }
         }
     });
 
