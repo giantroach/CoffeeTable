@@ -13,7 +13,8 @@ updates = {
     "savAll": "function (doc, req) { var i, max, key, id, splitData, target, frm = req.form || {}, data = [], grp = frm.grp || 'data', nm = frm.nm || 'anonymous', tm = new Date().toString(), find = function (ary, id) { var i, max, idx = -1; for (i = 0, max = ary.length; i < max; i += 1) { if (ary[i].guid === id) { idx = i; break; } } return idx; }; for (key in frm) { splitData = key.split(/[\\[\\]]+/g); if (splitData.length === 4) { if (!data[splitData[1]]) { data[splitData[1]] = {}; } data[splitData[1]][splitData[2]] = frm[key]; } } if (!doc[grp]) { doc[grp] = {}; } if (!doc[grp].data) { doc[grp].data = []; } for (i = 0, max = data.length; i < max; i += 1) { id = data[i].guid; data[i].nm = nm; data[i].tm = tm; target = find(doc[grp].data, id); if (target < 0) { doc[grp].data.push(data[i] || {}); if (doc[grp].data.length > (doc.maxline || 1000)) { return [doc, 'update aborted : exceeding the maxline ' + (doc.maxline || 1000)]; } } else { doc[grp].data[target] = data[i] || {}; } } return [doc, 'update complete : [' + grp + ']'];}",
     "delAll": "function (doc, req) { var frm = req.form || {}, grp = frm.grp || 'data'; if (!doc[grp]) { doc[grp] = {}; } else { doc[grp] = { dest: doc[grp].dest, destTag: doc[grp].destTag, usr: doc[grp].usr, data: [] }; } return [doc, 'delete complete : [' + grp + ']'];}",
     "traAll": "function (doc, req) { var key, target, splitData, i, frm = req.form || {}, from = frm.from, to = frm.to, guids = [], dest = frm.dest, override = {}, retStr = '', find = function (ary, id) { var i, max, idx = -1; for (i = 0, max = ary.length; i < max; i += 1) { if (ary[i].guid === id) { idx = i; break; } } return idx; }, extend = function (dst, src) { var key; for (key in src) { dst[key] = src[key]; } return dst; }; for (key in frm) { if (key.indexOf('guids') >= 0) { splitData = key.split(/[\\[\\]]+/g); if (splitData.length === 3) { guids.push(frm[key]); } } } for (key in frm) { if (key.indexOf('override') >= 0) { splitData = key.split(/[\\[\\]]+/g); if (splitData.length === 3) { override[splitData[1]] = frm[key]; } } } override.grp = to; override.nm = frm.nm || 'anonymous'; override.tm = new Date().toString(); if (!doc[from] || !doc[from].data) { return [doc, 'transfer failed : [' + from + ' > ' + to + '] grp [' + from + '] does not exist.']; } if (!doc[to]) { doc[to] = {}; } if (!doc[to].data) { doc[to].data = []; } if (dest) { doc[to].dest = dest; } if (!guids.length) { for (i = doc[from].data.length - 1; 0 <= i; i -= 1) { doc[to].data.unshift(extend(doc[from].data.splice(i, 1)[0], override)); } return [doc, 'transfer complete : [' + from + ' > ' + to + ' : ALL]']; } for (i = guids.length - 1; 0 <= i; i -= 1) { target = find(doc[from].data, guids[i]); if (target >= 0) { doc[to].data.unshift(extend(doc[from].data.splice(target, 1)[0], override)); retStr += (guids[i] + ', '); } } return [doc, 'transfer complete : [' + from + ' > ' + to + ' : ' + retStr + ']'];}",
-    "traBac": "function (doc, req) { var key, i, max, j, jmax, splitData, frm = req.form || {}, grp = frm.grp || 'data', dest = frm.dest, rxIsSuffixed = new RegExp('^' + grp + '_\\\\$.+$'), targets = [], override = {}, extend = function (dst, src) { var key; for (key in src) { dst[key] = src[key]; } return dst; }; for (key in doc) { if (rxIsSuffixed.test(key)) { targets.push(key); } } if (!targets.length) { return [doc, 'transfer back failed : [' + grp + '] no target found.']; } for (key in frm) { if (key.indexOf('override') >= 0) { splitData = key.split(/[\\[\\]]+/g); if (splitData.length === 3) { override[splitData[1]] = frm[key]; } } } override.grp = grp; override.nm = frm.nm || 'anonymous'; override.tm = new Date().toString(); if (!doc[grp]) { doc[grp] = {}; } if (!doc[grp].data) { doc[grp].data = []; } if (dest) { doc[grp].dest = dest; } for (i = 0, max = targets.length; i < max; i += 1) { for (j = 0, jmax = doc[targets[i]].data.length; j < jmax; j += 1) { doc[targets[i]].data[j] = extend(doc[targets[i]].data[j], override); } doc[grp].data = doc[grp].data.concat(doc[targets[i]].data); doc[targets[i]].data = []; } return [doc, 'transfer back complete : [' + grp + ']'];}"
+    "traBac": "function (doc, req) { var key, i, max, j, jmax, splitData, frm = req.form || {}, grp = frm.grp || 'data', dest = frm.dest, rxIsSuffixed = new RegExp('^' + grp + '_\\\\$.+$'), targets = [], override = {}, extend = function (dst, src) { var key; for (key in src) { dst[key] = src[key]; } return dst; }; for (key in doc) { if (rxIsSuffixed.test(key)) { targets.push(key); } } if (!targets.length) { return [doc, 'transfer back failed : [' + grp + '] no target found.']; } for (key in frm) { if (key.indexOf('override') >= 0) { splitData = key.split(/[\\[\\]]+/g); if (splitData.length === 3) { override[splitData[1]] = frm[key]; } } } override.grp = grp; override.nm = frm.nm || 'anonymous'; override.tm = new Date().toString(); if (!doc[grp]) { doc[grp] = {}; } if (!doc[grp].data) { doc[grp].data = []; } if (dest) { doc[grp].dest = dest; } for (i = 0, max = targets.length; i < max; i += 1) { for (j = 0, jmax = doc[targets[i]].data.length; j < jmax; j += 1) { doc[targets[i]].data[j] = extend(doc[targets[i]].data[j], override); } doc[grp].data = doc[grp].data.concat(doc[targets[i]].data); doc[targets[i]].data = []; } return [doc, 'transfer back complete : [' + grp + ']'];}",
+    "resTem": "function (doc, req) { var i, max, templates, frm = req.form || {}, grp = frm.grp || 'data', nm = frm.nm || 'anonymous', tm = new Date().toString(), genGuid = (function () { var s4 = function () { return Math.floor((1 + Math.random()) * 0x10000) .toString(16) .substring(1); }; return function (prefix) { return (prefix || '') + s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4(); }; }()), extend = function (dst, src) { var key; for (key in src) { dst[key] = src[key]; } return dst; }; if (!doc[grp]) { doc[grp] = {}; } doc[grp].data = []; if (doc.$_def && doc.$_def.templates && doc.$_def.templates[grp]) { templates = doc.$_def.templates[grp]; for (i = 0, max = templates.length; i < max; i += 1) { doc[grp].data.push(extend({ nm: nm, tm: tm, grp: grp, guid: genGuid(doc._id + '_') }, templates[i])); } } return [doc, 'reset to templates complete : [' + grp + ']'];}"
 }
 
 
@@ -489,3 +490,57 @@ var traBac = function (doc, req) {
 
     return [doc, 'transfer back complete : [' + grp + ']'];
 };
+
+
+
+
+// Reset to template
+var resTem = function (doc, req) {
+    var i, max, templates,
+        frm = req.form || {},
+        grp = frm.grp || 'data',
+        nm = frm.nm || 'anonymous',
+        tm = new Date().toString(),
+
+        genGuid = (function () {
+            var s4 = function () {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                        .toString(16)
+                        .substring(1);
+            };
+
+            return function (prefix) {
+                return (prefix || '') +
+                    s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+                    s4() + '-' + s4() + s4() + s4();
+            };
+        }()),
+
+        extend = function (dst, src) {
+            var key;
+            for (key in src) {
+                dst[key] = src[key];
+            }
+            return dst;
+        };
+
+    if (!doc[grp]) {
+        doc[grp] = {};
+    }
+    doc[grp].data = [];
+
+    if (doc.$_def && doc.$_def.templates && doc.$_def.templates[grp]) {
+        templates = doc.$_def.templates[grp];
+        for (i = 0, max = templates.length; i < max; i += 1) {
+            doc[grp].data.push(extend({
+                nm: nm,
+                tm: tm,
+                grp: grp,
+                guid: genGuid(doc._id + '_')
+            }, templates[i]));
+        }
+    }
+
+    return [doc, 'reset to templates complete : [' + grp + ']'];
+};
+

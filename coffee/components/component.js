@@ -7,6 +7,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
     var _ = ext._,
         $ = ext.$,
         Backbone = ext.Backbone,
+        w = ext.w,
+
         m = {},
         c = {},
         r = {},
@@ -408,16 +410,21 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @param {String} from
          * @param {String} to
          * @param {String[]} guids
+         * @param {String} dest
+         * @param {Object} override
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
          */
-        sendTraAll: function (from, to, guids, suc, err) {
-            send.call(this, "traAll", this.prototype.name, {
+        sendTraAll: function (from, to, data, suc, err) {
+            if (!data) {
+                data = {};
+            }
+
+            send.call(this, "traAll", this.prototype.name, _.extend(data, {
                 from: from,
                 to: to,
-                guids: guids
-            }, suc, err);
+            }), suc, err);
             return this;
         },
 
@@ -434,6 +441,21 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             send.call(this, "traBac", this.prototype.name, {
                 grp: grp,
                 override: override
+            }, suc, err);
+            return this;
+        },
+
+        /**
+         * Reset data to templates
+         * @method sendResTem
+         * @param {String} grp
+         * @param {Function} suc Callback for success (optional)
+         * @param {Function} err Callback for error (optional)
+         * @return {this}
+         */
+        sendResTem: function (grp, suc, err) {
+            send.call(this, "resTem", this.prototype.name, {
+                grp: grp
             }, suc, err);
             return this;
         },
@@ -636,6 +658,10 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 this.events.mousedown = "mousedown";
             }
 
+            if (this.model.get("rotate")) {
+                this.events.mouseup = "mouseup";
+            }
+
             if (this.model.get("draggable")) {
                 this.dndHandle(this.$el);
             }
@@ -643,15 +669,28 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             this.delegateEvents();
         },
 
-        //mousedown handler
+        mouseup: function (e) {
+            if (e.which === 1) {
+                if (w.Number(new w.Date) - this.model.mousedownAt < 200) {
+                    this.model.rotate();
+                }
+            }
+        },
+
+        // mousedown handler
         mousedown: function (e) {
+            if (e.which === 1) {
+                // left click
+                if (this.model.get("rotate")) {
+                    // rotate if it mouse up within 200ms
+                    this.model.mousedownAt = w.Number(new w.Date);
+                }
+            }
+
             if (e.which === 3) {
-                //right click
+                // right click
                 if (this.model.get("contextmenu")) {
                     this.model.contextmenu(e.clientX, e.clientY);
-
-                } else if (this.model.get("rotate")) {
-                    this.model.rotate();
                 }
 
                 e.preventDefault();
