@@ -54,6 +54,8 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         },
 
         startResizeHandling = function () {
+            var underFooterAnimate = false;
+            
             $center = $("#center");
             $header = $("#header");
             $left = $("#left");
@@ -89,31 +91,36 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
             $right.hide();
 
             // header
-            $header.bind("mouseover", function () {
-                $(this).fadeTo(200, 1);
-            });
-            $header.bind("mouseout", function (args) {
-                if (args.relatedTarget !== this
-                        && !$(args.relatedTarget).parents("#" + this.id).length) {
-
-                    $header.fadeTo(200, 0.5);
-                }
-            });
-            $header.fadeTo(200, 0.5);
+            // none
 
             // footer
-            $footer.bind("mouseover", function () {
-                $(this).fadeTo(200, 1);
+            $footer.bind("mouseover", function (args) {
+                if (underFooterAnimate) {
+                    return;
+                }
+
+                underFooterAnimate = true;
+                $footer.animate({
+                    height: "256px"
+                }, 100, function () {
+                    underFooterAnimate = false;
+                });
             });
             $footer.bind("mouseout", function (args) {
-                if (args.relatedTarget !== this
-                        && !$(args.relatedTarget).parents("#" + this.id).length) {
+                if (underFooterAnimate
+                    || $(args.relatedTarget).parents("#footer").length
+                    || args.relatedTarget && args.relatedTarget.id && /^Contextmenu_/.test(args.relatedTarget.id)) {
 
-                    $footer.fadeTo(200, 0.5);
+                    return;
                 }
-            });
-            $footer.fadeTo(200, 0.5);
 
+                underFooterAnimate = true;
+                $footer.animate({
+                    height: "48px"
+                }, 100, function () {
+                    underFooterAnimate = false;
+                });
+            });
             ext.onResize(adjustMargin);
             adjustMargin();
         };
