@@ -159,6 +159,28 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
 
             col.add(mod);
             callback();
+        },
+
+        /**
+         * @method getWinsize
+         * @param {Object}} box Boxed object size (optional)
+         * @return {Object} 
+         */
+        getCenterCoordinate: function (box) {
+            var width, height;
+            
+            if (!box) {
+                box = {
+                    width: 0,
+                    height: 0
+                };
+            }
+
+            // width
+            return {
+                x: ext.w.parseInt(($center.width() / 2) + $center.scrollLeft() - (box.width / 2), 10),
+                y: ext.w.parseInt(($center.height() / 2) + $center.scrollTop() - (box.height / 2), 10)
+            };
         }
     });
 

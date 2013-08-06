@@ -47,17 +47,25 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
         },
 
         play: function () {
-            var grp = this.genNewGrpStr({
-                state: "played"
-            });
+            var centerPos,
+                grp = this.genNewGrpStr({
+                    state: "played"
+                });
 
             if (grp === this.get("grp")) {
                 return;
             }
+            
+            centerPos = ext.c.Frame.getCenterCoordinate({
+                height: this.view.$el.height(),
+                width: this.view.$el.width()
+            });
 
             this.sendTra(grp, {
                 override: {
-                    draggable: true
+                    draggable: true,
+                    css_px_left: centerPos.x,
+                    css_px_top: centerPos.y
                 },
                 dest: "center"
             });

@@ -222,10 +222,14 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
     }, {
         isMine: (function () {
-            var rx = new RegExp("(^[^\\$]+$)|(_\\$[^.+]\\$$)|(_\\$" + ext.usr + ")$");
+            var rx;
 
-            return function () {
-                return rx.test(arguments);
+            return function (str) {
+                if (!rx) {
+                    // make delay for define ext.usr
+                    rx = new RegExp("(^[^\\$]+$)|(_\\$[^_]+\\$$)|(_\\$" + ext.usr + ")$")
+                }
+                return rx.test(str);
             };
         }()),
 
@@ -604,9 +608,11 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             // bind model to the view
             if (opt instanceof Backbone.Model) {
                 this.model = opt;
+                this.model.view = this;
 
             } else {
                 this.model = new ext.m[this.name](opt, c);
+                this.model.view = this;
             }
 
             if (this.init) {
@@ -618,12 +624,14 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             });
 
             // appends only once
+            this.$el.hide();
             if (!opt.dest) {
                 c.$dest.append(this.$el);
 
             } else {
                 $(opt.dest).append(this.$el);
             }
+            this.$el.fadeIn(100);
 
             this.model.bind("change", function (model) {
                 that.render(model.attributes);
@@ -631,6 +639,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
             this.model.bind("destroy", function () {
                 that.remove();
+                that.model = null;
             });
 
             //initialize options before view is being instanced
