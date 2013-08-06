@@ -208,7 +208,7 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
             }
 
             if (args.target.id === "right_pin") {
-                if (left_pin === "off") {
+                if (right_pin === "off") {
                     right_pin = "on";
                     $(args.target).removeClass("pin_off").addClass("pin_on");
                     adjustMargin();
