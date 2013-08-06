@@ -668,7 +668,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 this.$el.show();
             }
 
-            this.$el.html(this.template(_.extend(this.defData, data)));
+            this.$el.html(this.template(_.extend(_.extend({}, this.defData), data)));
 
             if ((opt && opt.noAnim) || this.noAnim) {
                 this.updateStyle(true);
