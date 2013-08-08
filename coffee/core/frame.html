@@ -13,11 +13,13 @@
 <style type="text/css">
 #header{
     background-color: #CCBBBB;
-    height: 48px;
+    height: 64px;
     width: 100%;
     position: absolute;
     top: 0;
     overflow: hidden;
+    z-index: 1000;
+    padding: 0 48px;
 }
 
 #left{
@@ -26,10 +28,12 @@
     left: 0;
     background-color: #BBCCBB;
     overflow: auto;
+    z-index: 1000;
 }
 #left{
     width: 256px;
     margin-left: -208px;
+    z-index: 1000;
 }
 
 #right{
@@ -38,6 +42,7 @@
     right: 0;
     background-color: #BBCCBB;
     overflow: auto;
+    z-index: 1000;
 }
 #right{
     width: 256px;
@@ -52,6 +57,7 @@
     position: absolute;
     bottom: 0;
     overflow: hidden;
+    z-index: 1001;
 }
 
 #center{

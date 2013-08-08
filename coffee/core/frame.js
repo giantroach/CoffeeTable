@@ -42,20 +42,20 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
             }
 
             $center.css({
-                height: height - (48 * 2) + "px",
+                height: height - (64 + 48) + "px",
                 width: width - (leftMargin + rightMargin) + "px",
-                margin: "48px " + rightMargin + "px 48px " + leftMargin + "px",
+                margin: "64px " + rightMargin + "px 48px " + leftMargin + "px",
                 overflow: "auto"
             });
 
             $left.css({
-                height: height - (48 * 2) + "px",
-                marginTop: "48px",
+                height: height - (64 + 48) + "px",
+                marginTop: "64px",
                 marginBottom: "48px"
             });
             $right.css({
-                height: height - (48 * 2) + "px",
-                marginTop: "48px",
+                height: height - (64 + 48) + "px",
+                marginTop: "64px",
                 marginBottom: "48px"
             });
         },
