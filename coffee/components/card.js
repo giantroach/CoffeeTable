@@ -55,13 +55,14 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
             if (grp === this.get("grp")) {
                 return;
             }
-            
+
             centerPos = ext.c.Frame.getCenterCoordinate({
                 height: this.view.$el.height(),
                 width: this.view.$el.width()
             });
 
-            this.sendTra(grp, {
+            this.sendTra({
+                to: grp,
                 override: {
                     draggable: true,
                     css_px_left: centerPos.x,
@@ -80,7 +81,8 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
                 return;
             }
 
-            this.sendTra(grp, {
+            this.sendTra({
+                to: grp,
                 override: {
                     draggable: ""
                 },
@@ -98,7 +100,8 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
                 return;
             }
 
-            this.sendTra(grp, {
+            this.sendTra({
+                to: grp,
                 override: {
                     draggable: ""
                 },
@@ -132,16 +135,19 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
         /**
          * @method resetDeck
          * @param {String} grp
+         * @param {String} withoutShuffle (optional)
          * @return {this}
          */
-        resetDeck: function (grp) {
+        resetDeck: function (grp, withoutShuffle) {
             var that = this;
 
             this.sendTraBac(grp, null, function () {
-                that.sendResTem(grp, function () {
-                    that.sendShu(grp);
+                that.sendResTem(grp, null, function () {
+                    if (!withoutShuffle) {
+                        that.sendShu(grp);
+                    }
                 });
-            })
+            });
         },
 
         /**
@@ -152,10 +158,8 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
          * @return {this}
          */
         shuffleIntoDeck: function (grp, shuffle) {
-            var i, max,
-                that = this,
-                models = [],
-                templates = _.extend([], this.def.templates[grp]);
+            var that = this,
+                models = [];
 
             this.sendTraBac(grp, null, function () {
                 if (shuffle || shuffle === undefined) {
@@ -172,12 +176,14 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
          * @param {String} grp
          */
         reShuffle: function (grp) {
-            this.sendTraAll(grp + "_$discarded$", grp);
+            this.sendTraAll(grp + "_$discarded$", {
+                to: grp
+            });
 
             return this;
         },
 
-        draw: function () {
+        drawTake: function () {
             this.take.apply(this, arguments);
         },
 
@@ -192,8 +198,7 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
          * @return {this}
          */
         initDraw: function (from, to, override, suc, err) {
-            var data = {},
-                that = this;
+            var that = this;
 
             if (!to) {
                 to = genNewGrpStr(from, {
@@ -209,8 +214,9 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
                 return;
             }
 
-            this.sendResTem(from, function () {
-                that.sendTraAll(from, to, {
+            this.sendResTem(from, null, function () {
+                that.sendTraAll(from, {
+                    to: to,
                     dest: "footer",
                     override: override
                 }, suc, err);

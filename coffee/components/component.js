@@ -113,54 +113,151 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         /**
          * Send insert data to the server
          * @method sendIns
+         * @param {Object} data (optional)
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
          */
-        sendIns: function (suc, err) {
-            send.call(this, "ins", this.name, this.attributes, suc, err);
+        sendIns: function (data, suc, err) {
+            if (!data) {
+                data = {};
+            } else {
+                data = _.extend({}, data);
+            }
+            data = _.extend(_.extend({}, this.attributes), data);
+
+            send.call(this, "ins", this.name, data, suc, err);
             return this;
         },
 
         /**
          * Send save data to the server
          * @method sendSav
+         * @param {Object} data (optional)
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
          */
-        sendSav: function (suc, err) {
-            send.call(this, "sav", this.name, this.attributes, suc, err);
+        sendSav: function (data, suc, err) {
+            if (!data) {
+                data = {};
+            } else {
+                data = _.extend({}, data);
+            }
+            data = _.extend(_.extend({}, this.attributes), data);
+
+            send.call(this, "sav", this.name, data, suc, err);
+            return this;
+        },
+
+        /**
+         * Send clone data to the server
+         * @method sendClo
+         * @param {Object} data (optional)
+         * @param {Function} suc Callback for success (optional)
+         * @param {Function} err Callback for error (optional)
+         * @return {this}
+         */
+        sendClo: function (data, suc, err) {
+            if (!data) {
+                data = {};
+            } else {
+                data = _.extend({}, data);
+            }
+            data = _.extend(_.extend({}, this.attributes), data);
+
+            // replace guid to clone the data
+            data.guid = this.name + "_" + ext.genGuid();
+
+            send.call(this, "sav", this.name, data, suc, err);
             return this;
         },
 
         /**
          * Send delete data to the server
          * @method sendDel
+         * @param {Object} data
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
          */
-        sendDel: function (suc, err) {
-            send.call(this, "del", this.name, this.attributes, suc, err);
+        sendDel: function (data, suc, err) {
+            if (!data) {
+                data = {};
+            } else {
+                data = _.extend({}, data);
+            }
+            data = _.extend(_.extend({}, this.attributes), data);
+
+            send.call(this, "del", this.name, data, suc, err);
             return this;
         },
 
         /**
          * Send transfer data to the server
          * @method sendTra
-         * @param {String} to Destination grp
-         * @param {Object} data Any extra data to send (optional)
+         * @param {Object} data
+         * <ul>
+         * <li>{String}to: Destination grp.</li>
+         * <li></li>
+         * </ul>
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
          */
-        sendTra: function (to, data, suc, err) {
-            send.call(this, "tra", this.name, _.extend(data || {}, {
-                guid: this.get("guid"),
-                from: this.get("grp"),
-                to: to
-            }), suc, err);
+        sendTra: function (data, suc, err) {
+            if (!data) {
+                data = {};
+            } else {
+                data = _.extend({}, data);
+            }
+            data = _.extend(_.extend({}, this.attributes), data);
+
+            data.from = this.get("grp");
+
+            send.call(this, "tra", this.name, data, suc, err);
+            return this;
+        },
+
+        /**
+         * Clone and transfer
+         * @method cloTra
+         * @param {Object} data
+         * <ul>
+         * <li>{String}to: Destination grp (optional) draw to ur hand if not specified.</li>
+         * <li>{Boolean}play: If it to play.</li>
+         * </ul>
+         * @param {Function} suc
+         * @param {Function} err
+         * @return {this}
+         */
+        sendCloTra: function (data, suc, err) {
+            var centerPos;
+
+            if (!data) {
+                data = {};
+            } else {
+                data = _.extend({}, data);
+            }
+            data = _.extend(_.extend({}, this.attributes), data);
+
+            data.guid = this.name + "_" + ext.genGuid();
+
+            if (data.play) {
+                centerPos = ext.c.Frame.getCenterCoordinate({
+                    height: this.view.$el.height(),
+                    width: this.view.$el.width()
+                });
+
+                _.extend(data, {
+                    draggable: true,
+                    css_px_left: centerPos.x,
+                    css_px_top: centerPos.y
+                });
+            }
+
+            send.call(this, "sav", this.name, data, suc, err);
+
             return this;
         },
 
@@ -227,7 +324,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             return function (str) {
                 if (!rx) {
                     // make delay for define ext.usr
-                    rx = new RegExp("(^[^\\$]+$)|(_\\$[^_]+\\$$)|(_\\$" + ext.usr + ")$")
+                    rx = new RegExp("(^[^\\$]+$)|(_\\$[^_]+\\$$)|(_\\$" + ext.usr + ")$");
                 }
                 return rx.test(str);
             };
@@ -324,6 +421,9 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                                     if (!contextmenuData.dest) {
                                         contextmenuData.dest = "body";
                                     }
+                                    if (!contextmenuData.guid) {
+                                        contextmenuData.guid = "Contextmenu_" + ext.genGuid();
+                                    }
                                     contextmenu = new ext.v.Contextmenu(contextmenuData, c).model;
                                     c.add(contextmenu);
                                 }
@@ -417,55 +517,68 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * Send shuffle request to the server
          * @method sendShu
          * @param {String} grp
+         * @param {Object} data override data
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
          */
-        sendShu: function (grp, suc, err) {
+        sendShu: function (grp, data, suc, err) {
+            if (!data) {
+                data = {};
+            } else {
+                data = _.extend({}, data);
+            }
+
+            _.extend(data, {
+                grp: grp
+            });
+
             send.call(this, "shu", this.prototype.name, {
                 grp: grp
             }, suc, err);
+
             return this;
         },
 
         /**
          * take
          * @method take
-         * @param {String} from grp
-         * @param {String} to (optional) if not specified, u draw to ur hand
-         * @param {Number} idx(optional)
-         * @param {Function} suc
-         * @param {Function} err
+         * @param {String} grp
+         * @param {Object} data (optional)
+         * <ul>
+         * <li>to: destination (optional) Draw to ur hand if not specified.</li>
+         * <li>idx: index of the card (optional) Draw from the top if not specified.</li>
+         * </ul>
+         * @param {Function} suc (optional)
+         * @param {Function} err (optional)
          * @return {this}
          */
-        take: function (from, to, idx, suc, err) {
-            var data = {};
-
-            if (idx === undefined) {
-                idx = 0;
+        sendTake: function (grp, data, suc, err) {
+            if (!data) {
+                data = {};
+            } else {
+                data = _.extend({}, data);
             }
 
-            if (!to) {
-                to = genNewGrpStr(from, {
+            data.from = grp;
+
+            if (!data.to) {
+                data.to = genNewGrpStr(grp, {
                     usr: ext.usr
                 });
-
-                data = {
-                    dest: "footer"
-                };
+                data.dest = "footer";
             }
 
-            if (from === to) {
-                return;
+            if (data.from === data.to) {
+                // this can delete the data
+                return this;
             }
 
-            _.extend(data, {
-                from: from,
-                to: to,
-                idx: idx
-            });
+            if (data.idx === undefined) {
+                data.idx = 0;
+            }
 
-            this.send("tra", this.prototype.name, data, suc, err);
+            send.call(this, "tra", this.prototype.name, data, suc, err);
 
             return this;
         },
@@ -473,41 +586,58 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         /**
          * Transfer multiple targes
          * @method sendTraAll
-         * @param {String} from
-         * @param {String} to
-         * @param {String[]} guids
-         * @param {String} dest
-         * @param {Object} override
+         * @param {String} grp
+         * @param {Object} data
+         * <ul>
+         * <li>{String}to: Destination grp.</li>
+         * <li>{String}dest: Destination element ID to override (optional)</li>
+         * <li>{String[]}guids: List of target GUID (optional) transfer all if not specified.</li>
+         * <li>{Object}override: Override data (optional)</li>
+         * </ul>
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
          */
-        sendTraAll: function (from, to, data, suc, err) {
+        sendTraAll: function (grp, data, suc, err) {
             if (!data) {
                 data = {};
+            } else {
+                data = _.extend({}, data);
+            }
+            data.from = grp;
+
+            if (!data.to) {
+                // this arguemnt is must
+                return this;
             }
 
-            send.call(this, "traAll", this.prototype.name, _.extend(data, {
-                from: from,
-                to: to,
-            }), suc, err);
+            send.call(this, "traAll", this.prototype.name, data, suc, err);
+
             return this;
         },
 
         /**
          * Transfer back all suffixed grp
-         * @method sendTraAll
+         * @method sendTraBac
          * @param {String} grp
-         * @param {String} override (optional)
+         * @param {String} data (optional)
+         * <li>
+         * <li>{Object}override: override data (optional)</li>
+         * </li>
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
          */
-        sendTraBac: function (grp, override, suc, err) {
-            send.call(this, "traBac", this.prototype.name, {
-                grp: grp,
-                override: override
-            }, suc, err);
+        sendTraBac: function (grp, data, suc, err) {
+            if (!data) {
+                data = {};
+            } else {
+                data = _.extend({}, data);
+            }
+            data.grp = grp;
+
+            send.call(this, "traBac", this.prototype.name, data, suc, err);
+
             return this;
         },
 
@@ -515,14 +645,20 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * Reset data to templates
          * @method sendResTem
          * @param {String} grp
+         * @param {Object} data
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
          */
-        sendResTem: function (grp, suc, err) {
-            send.call(this, "resTem", this.prototype.name, {
-                grp: grp
-            }, suc, err);
+        sendResTem: function (grp, data, suc, err) {
+            if (!data) {
+                data = {};
+            } else {
+                data = _.extend({}, data);
+            }
+            data.grp = grp;
+
+            send.call(this, "resTem", this.prototype.name, data, suc, err);
             return this;
         },
 
@@ -742,7 +878,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
         mouseup: function (e) {
             if (e.which === 1) {
-                if (w.Number(new w.Date) - this.model.mousedownAt < 200) {
+                if (w.Number(new w.Date()) - this.model.mousedownAt < 200) {
                     this.model.rotate();
                 }
             }
@@ -754,7 +890,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 // left click
                 if (this.model.get("rotate")) {
                     // rotate if it mouse up within 200ms
-                    this.model.mousedownAt = w.Number(new w.Date);
+                    this.model.mousedownAt = w.Number(new w.Date());
                 }
             }
 
