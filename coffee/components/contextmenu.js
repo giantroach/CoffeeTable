@@ -36,7 +36,7 @@ coffee.include("Contextmenu", "contextmenu.html", ["Component"], function (name,
                 return item.label === label;
             });
             if (item) {
-                this.lastModel[item.callback]();
+                this.lastModel[item.callback].apply(this.lastModel, item.args);
             }
         }
     });
@@ -62,7 +62,6 @@ coffee.include("Contextmenu", "contextmenu.html", ["Component"], function (name,
         noAnim: true,
 
         init: function (opt) {
-            
         },
 
         afterRender: function () {
