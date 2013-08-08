@@ -1,11 +1,73 @@
 <div class="rotate_<%- rotate %> <%- cls %>" title="">
     <div class="title"><%- title %></div>
+
+<% if (text) { %>
     <div class="text"><%- text %></div>
+<% } %>
+
+<% if (line0cls || line0text) { %>
+    <div class="<%- line0cls %>"><%- line0text %></div>
+<% } %>
+
+<% if (line1cls || line1text) { %>
+    <div class="<%- line1cls %>"><%- line1text %></div>
+<% } %>
+
+<% if (line2cls || line2text) { %>
+    <div class="<%- line2cls %>"><%- line2text %></div>
+<% } %>
+
+<% if (line3cls || line3text) { %>
+    <div class="<%- line3cls %>"><%- line3text %></div>
+<% } %>
+
+<% if (line4cls || line4text) { %>
+    <div class="<%- line4cls %>"><%- line4text %></div>
+<% } %>
+
+<% if (line5cls || line5text) { %>
+    <div class="<%- line5cls %>"><%- line5text %></div>
+<% } %>
+
+<% if (line6cls || line6text) { %>
+    <div class="<%- line6cls %>"><%- line6text %></div>
+<% } %>
+
+<% if (line7cls || line7text) { %>
+    <div class="<%- line7cls %>"><%- line7text %></div>
+<% } %>
+
+<% if (line8cls || line8text) { %>
+    <div class="<%- line8cls %>"><%- line8text %></div>
+<% } %>
+
+<% if (line9cls || line9text) { %>
+    <div class="<%- line9cls %>"><%- line9text %></div>
+<% } %>
+
 </div>
 
 <style type="text/css">
 .Card .component{
     z-index: 300;
 }
+
+.Card .component{
+    border: 2px solid black;
+    border-radius: 8px 8px 8px 8px;
+    display: block;
+    height: 256px;
+    padding: 4px;
+    width: 192px;
+    background-color: #ffffee;
+    box-shadow: 0 2px 4px black;
+    overflow: auto;
+}
+
+.Card .component .title{
+    font-weight: bold;
+    height: 24px;
+}
+
 <%- $_css %>
 </style>

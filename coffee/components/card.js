@@ -183,8 +183,8 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
             return this;
         },
 
-        drawTake: function () {
-            this.take.apply(this, arguments);
+        draw: function () {
+            this.sendTake.apply(this, arguments);
         },
 
         /**
@@ -230,7 +230,28 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
     v[name] = ext.v.Component.extend({
         defData: {
             title: "",
-            text: ""
+            text: "",
+
+            line0cls: "",
+            line0text: "",
+            line1cls: "",
+            line1text: "",
+            line2cls: "",
+            line2text: "",
+            line3cls: "",
+            line3text: "",
+            line4cls: "",
+            line4text: "",
+            line5cls: "",
+            line5text: "",
+            line6cls: "",
+            line6text: "",
+            line7cls: "",
+            line7text: "",
+            line8cls: "",
+            line8text: "",
+            line9cls: "",
+            line9text: ""
         }
     });
 
