@@ -126,7 +126,6 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
 
                 underRightAnim = true;
                 $right.animate({
-                    //~ width: "48px"
                     width: "256px",
                     marginRight: "-208px"
                 }, 100, null, function () {
@@ -139,7 +138,7 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
 
             // footer
             $footer.bind("mouseover", function (args) {
-                if (underFooterAnim) {
+                if (underFooterAnim || $footer.css("height") === "256px") {
                     return;
                 }
 
