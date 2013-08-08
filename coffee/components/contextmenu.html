@@ -1,4 +1,4 @@
-<ul>
+<ul class="Contextmenu">
 <%
 _.each(items, function (item) {
 %>
@@ -8,4 +8,8 @@ _.each(items, function (item) {
 %>
 </ul>
 
-<style type="text/css"></style>
+<style type="text/css">
+#Contextmenu .component{
+    z-index: 1000;
+}
+</style>

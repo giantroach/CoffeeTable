@@ -419,7 +419,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                                 contextmenu = c.getContextMenu();
                                 if (!contextmenu) {
                                     if (!contextmenuData.dest) {
-                                        contextmenuData.dest = "body";
+                                        contextmenuData.dest = "#Contextmenu";
                                     }
                                     if (!contextmenuData.guid) {
                                         contextmenuData.guid = "Contextmenu_" + ext.genGuid();

@@ -99,6 +99,9 @@ coffee.include("Contextmenu", "contextmenu.html", ["Component"], function (name,
         c[name].hideAll();
     });
 
+    // make a storage
+    $(d.body).append('<div id="Contextmenu"></div>');
+
 
     return {
         m : m[name],
@@ -107,4 +110,4 @@ coffee.include("Contextmenu", "contextmenu.html", ["Component"], function (name,
         v : v[name]
     };
 
-});
+}, { loadCssImmediate: true });
