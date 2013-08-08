@@ -1,10 +1,8 @@
 <div id="center"></div>
-<div id="left_proxy"></div>
 <div id="left">
     <div id="left_pin" class="pin_off"></div>
     <br>
 </div>
-<div id="right_proxy"></div>
 <div id="right">
     <div id="right_pin" class="pin_off"></div>
     <br>
@@ -22,8 +20,7 @@
     overflow: hidden;
 }
 
-#left,
-#left_proxy{
+#left{
     height: 100%;
     position: absolute;
     left: 0;
@@ -31,14 +28,11 @@
     overflow: auto;
 }
 #left{
-    width: 192px;
-}
-#left_proxy{
-    width: 48px;
+    width: 256px;
+    margin-left: -208px;
 }
 
-#right,
-#right_proxy{
+#right{
     height: 100%;
     position: absolute;
     right: 0;
@@ -46,10 +40,8 @@
     overflow: auto;
 }
 #right{
-    width: 192px;
-}
-#right_proxy{
-    width: 48px;
+    width: 256px;
+    margin-right: -208px;
 }
 
 #footer{

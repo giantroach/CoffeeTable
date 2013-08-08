@@ -18,14 +18,12 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         $center,
         $header,
         $left,
-        $left_proxy,
         $right,
-        $right_proxy,
         $footer,
 
         adjustMargin = function (width, height) {
             var leftMargin, rightMargin;
-            
+
             if (!width) {
                 width = ext.w.innerWidth;
             }
@@ -33,12 +31,12 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
                 height = ext.w.innerHeight;
             }
             if (left_pin === "on") {
-                leftMargin = 192;
+                leftMargin = 256;
             } else {
                 leftMargin = 48;
             }
             if (right_pin === "on") {
-                rightMargin = 192;
+                rightMargin = 256;
             } else {
                 rightMargin = 48;
             }
@@ -52,94 +50,122 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
 
             $left.css({
                 height: height - (48 * 2) + "px",
-                margin: "48px 0"
-            });
-            $left_proxy.css({
-                height: height - (48 * 2) + "px",
-                margin: "48px 0"
+                marginTop: "48px",
+                marginBottom: "48px"
             });
             $right.css({
                 height: height - (48 * 2) + "px",
-                margin: "48px 0"
-            });
-            $right_proxy.css({
-                height: height - (48 * 2) + "px",
-                margin: "48px 0"
+                marginTop: "48px",
+                marginBottom: "48px"
             });
         },
 
         startResizeHandling = function () {
-            var underFooterAnimate = false;
-            
+            var underFooterAnim = false,
+                underLeftAnim = false,
+                underRightAnim = false;
+
             $center = $("#center");
             $header = $("#header");
             $left = $("#left");
-            $left_proxy = $("#left_proxy");
             $right = $("#right");
-            $right_proxy = $("#right_proxy");
             $footer = $("#footer");
 
             // left
-            $left_proxy.bind("mouseover", function () {
-                $left.fadeIn(200);
+            $left.bind("mouseover", function (args) {
+                if (underLeftAnim || $left.css("marginLeft") === "0px") {
+                    return;
+                }
+
+                underLeftAnim = true;
+                $left.animate({
+                    marginLeft: "0px"
+                }, 100, null, function () {
+                    underLeftAnim = false;
+                });
             });
             $left.bind("mouseout", function (args) {
-                if (left_pin === "off"
-                        && args.relatedTarget !== this
-                        && !$(args.relatedTarget).parents("#" + this.id).length
-                        && !(args.relatedTarget && args.relatedTarget.id && /^Contextmenu_/.test(args.relatedTarget.id))) {
+                if (left_pin === "on"
+                        || underLeftAnim
+                        || $(args.relatedTarget).parents("#left").length
+                        || (args.relatedTarget && args.relatedTarget.id && /^Contextmenu_/.test(args.relatedTarget.id))) {
 
-                    $left.fadeOut(200);
+                    return;
                 }
+
+                underLeftAnim = true;
+                $left.animate({
+                    width: "256px",
+                    marginLeft: "-208px"
+                }, 100, null, function () {
+                    underLeftAnim = false;
+                });
             });
-            $left.hide();
 
             // right
-            $right_proxy.bind("mouseover", function () {
-                $right.fadeIn(200);
+            $right.bind("mouseover", function (args) {
+                if (underRightAnim || $right.css("marginRight") === "0px") {
+                    return;
+                }
+
+                underRightAnim = true;
+                $right.animate({
+                    marginRight: "0px"
+                }, 100, null, function () {
+                    underRightAnim = false;
+                });
             });
             $right.bind("mouseout", function (args) {
-                if (right_pin === "off"
-                        && args.relatedTarget !== this
-                        && !$(args.relatedTarget).parents("#" + this.id).length
-                        && !(args.relatedTarget && args.relatedTarget.id && /^Contextmenu_/.test(args.relatedTarget.id))) {
+                if (right_pin === "on"
+                        || underRightAnim
+                        || $(args.relatedTarget).parents("#right").length
+                        || (args.relatedTarget && args.relatedTarget.id && /^Contextmenu_/.test(args.relatedTarget.id))) {
 
-                    $right.fadeOut(200);
+                    return;
                 }
+
+                underRightAnim = true;
+                $right.animate({
+                    //~ width: "48px"
+                    width: "256px",
+                    marginRight: "-208px"
+                }, 100, null, function () {
+                    underRightAnim = false;
+                });
             });
-            $right.hide();
 
             // header
             // none
 
             // footer
             $footer.bind("mouseover", function (args) {
-                if (underFooterAnimate) {
+                if (underFooterAnim) {
                     return;
                 }
 
-                underFooterAnimate = true;
+                underFooterAnim = true;
                 $footer.animate({
                     height: "256px"
                 }, 100, function () {
-                    underFooterAnimate = false;
+                    underFooterAnim = false;
                 });
             });
             $footer.bind("mouseout", function (args) {
-                if (underFooterAnimate
-                    || $(args.relatedTarget).parents("#footer").length
-                    || args.relatedTarget && args.relatedTarget.id && /^Contextmenu_/.test(args.relatedTarget.id)) {
+                if (underFooterAnim
+                        || $(args.relatedTarget).parents("#footer").length
+                        || (args.relatedTarget && args.relatedTarget.id && /^Contextmenu_/.test(args.relatedTarget.id))) {
 
                     return;
                 }
 
-                underFooterAnimate = true;
+                underFooterAnim = true;
                 $footer.animate({
                     height: "48px"
                 }, 100, function () {
-                    underFooterAnimate = false;
+                    underFooterAnim = false;
                 });
             });
+
             ext.onResize(adjustMargin);
             adjustMargin();
         };
@@ -169,8 +195,6 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
          * @return {Object} 
          */
         getCenterCoordinate: function (box) {
-            var width, height;
-            
             if (!box) {
                 box = {
                     width: 0,
