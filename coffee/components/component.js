@@ -79,7 +79,6 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         };
 
 
-
     // Model --------------------------------
     m[name] = Backbone.Model.extend({
 
@@ -554,6 +553,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @return {this}
          */
         sendTake: function (grp, data, suc, err) {
+            var centerPos;
+
             if (!data) {
                 data = {};
             } else {
@@ -572,6 +573,12 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             if (data.from === data.to) {
                 // this can delete the data
                 return this;
+            }
+
+            if (data.play) {
+                data.override = {
+                    draggable: true
+                };
             }
 
             if (data.idx === undefined) {
