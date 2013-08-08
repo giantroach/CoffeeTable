@@ -1,24 +1,10 @@
 <div class="faces<%- faces %>" title="Click to roll">
-    <div class="face"><%- face %></div>
+    <div class="face<%- face %>"></div>
 </div>
 
 <style type="text/css">
-.Die component div{
-    width: 32px;
-    height: 32px;
-
-    cursor: pointer;
+.Die .component{
+    z-index: 500;
 }
-
-.Die .component .face{
-    height: 32px;
-    width: 32px;
-
-    font-size: large;
-    font-weight: bold;
-
-    display: table-cell;
-    text-align: center;
-    vertical-align: middle;
-}
+<%- $_css %>
 </style>
