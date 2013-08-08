@@ -86,7 +86,8 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
             $left.bind("mouseout", function (args) {
                 if (left_pin === "off"
                         && args.relatedTarget !== this
-                        && !$(args.relatedTarget).parents("#" + this.id).length) {
+                        && !$(args.relatedTarget).parents("#" + this.id).length
+                        && !(args.relatedTarget && args.relatedTarget.id && /^Contextmenu_/.test(args.relatedTarget.id))) {
 
                     $left.fadeOut(200);
                 }
@@ -100,7 +101,8 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
             $right.bind("mouseout", function (args) {
                 if (right_pin === "off"
                         && args.relatedTarget !== this
-                        && !$(args.relatedTarget).parents("#" + this.id).length) {
+                        && !$(args.relatedTarget).parents("#" + this.id).length
+                        && !(args.relatedTarget && args.relatedTarget.id && /^Contextmenu_/.test(args.relatedTarget.id))) {
 
                     $right.fadeOut(200);
                 }
