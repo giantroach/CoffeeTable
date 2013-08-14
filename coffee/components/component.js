@@ -294,8 +294,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             contextmenu.set({
                 hide: false,
                 css_position: "absolute",
-                css_px_top: y,
-                css_px_left: x
+                css_px_top: y - 1,
+                css_px_left: x - 1
             });
             contextmenu.lastModel = this;
         }
