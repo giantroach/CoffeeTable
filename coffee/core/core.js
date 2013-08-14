@@ -13,7 +13,9 @@ var coffee = (function (ext) {
 
         def = {
             fw: "coffee",
-            project: "coffee",
+            project: String(w.location)
+                .replace(/(\/[^/]+){2}$/g, "") // remove core/core.html
+                .replace(/^.+\//g, ""),
             componentsRoot: "components",
             HTTP_TIMEOUT: 2000
         },
@@ -354,10 +356,6 @@ var coffee = (function (ext) {
             var key,
                 that = this,
                 c = this.c;
-
-            def.project = String(window.location)
-                    .replace(/(\/[^/]+){2}$/g, "") // remove core/core.html
-                    .replace(/^.+\//g, ""); // remove http://url/
 
             // wait for all components to be loaded
             if (loading.length) {
