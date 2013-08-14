@@ -22,7 +22,7 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         $footer,
 
         adjustMargin = function (width, height) {
-            var leftMargin, rightMargin;
+            var leftMargin, rightMargin, headerPaddingLeft, headerPaddingRight;
 
             if (!width) {
                 width = ext.w.innerWidth;
@@ -32,13 +32,17 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
             }
             if (left_pin === "on") {
                 leftMargin = 256;
+                headerPaddingLeft = 256;
             } else {
                 leftMargin = 48;
+                headerPaddingLeft = 48;
             }
             if (right_pin === "on") {
                 rightMargin = 256;
+                headerPaddingRight = 256;
             } else {
                 rightMargin = 48;
+                headerPaddingRight = 48;
             }
 
             $center.css({
@@ -46,6 +50,11 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
                 width: width - (leftMargin + rightMargin) + "px",
                 margin: "64px " + rightMargin + "px 48px " + leftMargin + "px",
                 overflow: "auto"
+            });
+
+            $header.css({
+                paddingRight: headerPaddingRight + "px",
+                paddingLeft: headerPaddingLeft + "px"
             });
 
             $left.css({
