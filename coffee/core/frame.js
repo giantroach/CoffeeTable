@@ -161,7 +161,11 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
             $footer.bind("mouseout", function (args) {
                 if (underFooterAnim
                         || $(args.relatedTarget).parents("#footer").length
-                        || (args.relatedTarget && args.relatedTarget.id && /^Contextmenu_/.test(args.relatedTarget.id))) {
+                        || (args.relatedTarget
+                                && (args.relatedTarget.id
+                                        && (args.relatedTarget.id === "footer")
+                                                || /^Contextmenu_/.test(args.relatedTarget.id))
+                                || $(args.relatedTarget).parents("#Contextmenu").length)) {
 
                     return;
                 }
