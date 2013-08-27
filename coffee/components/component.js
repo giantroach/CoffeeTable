@@ -576,9 +576,10 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             }
 
             if (data.play) {
-                data.override = {
-                    draggable: true
-                };
+                if (!data.override) {
+                    data.ovarride = {};
+                }
+                data.override.draggable = true;
             }
 
             if (data.idx === undefined) {
