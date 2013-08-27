@@ -1,4 +1,11 @@
 <div class="rotate_<%- rotate %> <%- cls %>" title="">
+<% if (facedown) { %>
+
+    <div class="title">Backside</div>
+    <div class="text">Played by: <%- nm %></div>
+
+<% } else { %>
+
     <div class="title"><%- title %></div>
 
 <% if (text) { %>
@@ -44,6 +51,7 @@
 <% if (line9cls || line9text) { %>
     <div class="<%- line9cls %>"><%- line9text %></div>
 <% } %>
+<% } //face up/down %>
 
 </div>
 

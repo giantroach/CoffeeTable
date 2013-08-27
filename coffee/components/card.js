@@ -72,6 +72,20 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
             });
         },
 
+        playFacedown: function () {
+            this.set("facedown", true);
+            this.sendSav({}, function () {
+                this.play();
+            });
+            return this;
+        },
+
+        faceup: function () {
+            this.set("facedown", "");
+            this.sendSav();
+            return this;
+        },
+
         discard: function () {
             var grp = this.genNewGrpStr({
                 state: "discarded"
@@ -119,12 +133,20 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
                     callback: "play"
                 },
                 {
+                    label: "play facedown",
+                    callback: "playFacedown"
+                },
+                {
                     label: "discard",
                     callback: "discard"
                 },
                 {
                     label: "take",
                     callback: "take"
+                },
+                {
+                    label: "faceup",
+                    callback: "faceup"
                 }
             ]
         }
@@ -231,6 +253,7 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
         defData: {
             title: "",
             text: "",
+            facedown: "",
 
             line0cls: "",
             line0text: "",
