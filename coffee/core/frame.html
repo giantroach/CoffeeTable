@@ -1,9 +1,11 @@
 <div id="center"></div>
 <div id="left">
+    <div id="left_fold" class="fold_to_right"></div>
     <div id="left_pin" class="pin_off"></div>
     <br>
 </div>
 <div id="right">
+    <div id="right_fold" class="fold_to_left"></div>
     <div id="right_pin" class="pin_off"></div>
     <br>
 </div>
@@ -68,6 +70,31 @@
     top: 0;
 }
 
+
+/* fold */
+#left_fold,
+#right_fold{
+    height: 100%;
+    position: absolute;
+    vertical-align: middle;
+    width: 20px;
+    cursor: pointer;
+}
+#left_fold{
+    right: 0;
+}
+#right_fold{
+    left: 0;
+}
+.fold_to_right{
+    background: url("../img/frame.png") no-repeat scroll -20px center #888888;
+}
+.fold_to_left{
+    background: url("../img/frame.png") no-repeat scroll 0px center #888888;
+}
+
+
+/* pin */
 #left_pin,
 #right_pin{
     border: 2px solid black;
@@ -79,10 +106,10 @@
     margin: 4px;
 }
 #left_pin{
-    float: right;
+    float: left;
 }
 #right_pin{
-    float: left;
+    float: right;
 }
 #left br,
 #right br{

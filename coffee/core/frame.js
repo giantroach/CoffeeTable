@@ -18,7 +18,9 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         $center,
         $header,
         $left,
+        $left_fold,
         $right,
+        $right_fold,
         $footer,
 
         adjustMargin = function (width, height) {
@@ -77,69 +79,75 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
             $center = $("#center");
             $header = $("#header");
             $left = $("#left");
+            $left_fold = $("#left_fold");
             $right = $("#right");
+            $right_fold = $("#right_fold");
             $footer = $("#footer");
 
             // left
-            $left.bind("mouseover", function (args) {
-                if (underLeftAnim || $left.css("marginLeft") === "0px") {
+            $left_fold.bind("click", function () {
+                if (underLeftAnim || left_pin === "on") {
                     return;
                 }
 
-                underLeftAnim = true;
-                $left.animate({
-                    marginLeft: "0px"
-                }, 100, null, function () {
-                    underLeftAnim = false;
-                });
-            });
-            $left.bind("mouseout", function (args) {
-                if (left_pin === "on"
-                        || underLeftAnim
-                        || $(args.relatedTarget).parents("#left").length
-                        || (args.relatedTarget && args.relatedTarget.id && /^Contextmenu_/.test(args.relatedTarget.id))) {
+                if ($left_fold.is(".fold_to_right")) {
+                    // expand
+                    underLeftAnim = true;
+                    $left.animate({
+                        marginLeft: "0px"
+                    }, 100, null, function () {
+                        underLeftAnim = false;
+                        $left_fold
+                            .removeClass("fold_to_right")
+                            .addClass("fold_to_left");
+                    });
 
-                    return;
+                } else {
+                    // fold
+                    underLeftAnim = true;
+                    $left.animate({
+                        width: "256px",
+                        marginLeft: "-208px"
+                    }, 100, null, function () {
+                        underLeftAnim = false;
+                        $left_fold
+                            .removeClass("fold_to_left")
+                            .addClass("fold_to_right");
+                    });
                 }
-
-                underLeftAnim = true;
-                $left.animate({
-                    width: "256px",
-                    marginLeft: "-208px"
-                }, 100, null, function () {
-                    underLeftAnim = false;
-                });
             });
 
             // right
-            $right.bind("mouseover", function (args) {
-                if (underRightAnim || $right.css("marginRight") === "0px") {
+            $right_fold.bind("click", function () {
+                if (underRightAnim || right_pin === "on") {
                     return;
                 }
 
-                underRightAnim = true;
-                $right.animate({
-                    marginRight: "0px"
-                }, 100, null, function () {
-                    underRightAnim = false;
-                });
-            });
-            $right.bind("mouseout", function (args) {
-                if (right_pin === "on"
-                        || underRightAnim
-                        || $(args.relatedTarget).parents("#right").length
-                        || (args.relatedTarget && args.relatedTarget.id && /^Contextmenu_/.test(args.relatedTarget.id))) {
+                if ($right_fold.is(".fold_to_left")) {
+                    // expand
+                    underRightAnim = true;
+                    $right.animate({
+                        marginRight: "0px"
+                    }, 100, null, function () {
+                        underRightAnim = false;
+                        $right_fold
+                            .removeClass("fold_to_left")
+                            .addClass("fold_to_right");
+                    });
 
-                    return;
+                } else {
+                    // fold
+                    underRightAnim = true;
+                    $right.animate({
+                        width: "256px",
+                        marginRight: "-208px"
+                    }, 100, null, function () {
+                        underRightAnim = false;
+                        $right_fold
+                            .removeClass("fold_to_right")
+                            .addClass("fold_to_left");
+                    });
                 }
-
-                underRightAnim = true;
-                $right.animate({
-                    width: "256px",
-                    marginRight: "-208px"
-                }, 100, null, function () {
-                    underRightAnim = false;
-                });
             });
 
             // header
