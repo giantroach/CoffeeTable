@@ -15,7 +15,7 @@ var coffee = (function (ext) {
             fw: "coffee",
             project: String(w.location)
                 .replace(/(\/[^/]+){2}$/g, "") // remove core/core.html
-                .replace(/^.+\//g, ""),
+                .replace(/^.+\/\/[^/]+\//g, ""),
             componentsRoot: "components",
             HTTP_TIMEOUT: 2000
         },
