@@ -12,6 +12,8 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         r = {},
         v = {},
 
+        w = ext.w,
+
         left_pin = "off",
         right_pin = "off",
 
@@ -22,6 +24,7 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         $right,
         $right_fold,
         $footer,
+        $footer_wrap,
 
         adjustMargin = function (width, height) {
             var leftMargin, rightMargin, headerPaddingLeft, headerPaddingRight;
@@ -83,6 +86,7 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
             $right = $("#right");
             $right_fold = $("#right_fold");
             $footer = $("#footer");
+            $footer_wrap = $("#footer_wrap");
 
             // left
             $left_fold.bind("click", function () {
@@ -154,24 +158,24 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
             // none
 
             // footer
-            $footer.bind("mouseover", function (args) {
-                if (underFooterAnim || $footer.css("height") === "256px") {
+            $footer_wrap.bind("mouseover", function (args) {
+                if (underFooterAnim || $footer_wrap.css("height") === "256px") {
                     return;
                 }
 
                 underFooterAnim = true;
-                $footer.animate({
+                $footer_wrap.animate({
                     height: "256px"
                 }, 100, function () {
                     underFooterAnim = false;
                 });
             });
-            $footer.bind("mouseout", function (args) {
+            $footer_wrap.bind("mouseout", function (args) {
                 if (underFooterAnim
-                        || $(args.relatedTarget).parents("#footer").length
+                        || $(args.relatedTarget).parents("#footer_wrap").length
                         || (args.relatedTarget
                                 && (args.relatedTarget.id
-                                        && (args.relatedTarget.id === "footer")
+                                        && (args.relatedTarget.id === "footer_wrap")
                                                 || /^Contextmenu_/.test(args.relatedTarget.id))
                                 || $(args.relatedTarget).parents("#Contextmenu").length)) {
 
@@ -179,7 +183,7 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
                 }
 
                 underFooterAnim = true;
-                $footer.animate({
+                $footer_wrap.animate({
                     height: "48px"
                 }, 100, function () {
                     underFooterAnim = false;
@@ -261,6 +265,8 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         },
 
         click: function (args) {
+            var scroll;
+
             if (args.target.id === "left_pin") {
                 if (left_pin === "off") {
                     left_pin = "on";
@@ -287,6 +293,24 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
                 $(args.target).removeClass("pin_on").addClass("pin_off");
                 adjustMargin();
                 return;
+            }
+
+
+            // scrolls of footer
+            if (args.target.id === "footer_scroll_left") {
+                scroll = w.parseInt($("#footer").css("margin-left"), 10) + 512;
+                if (scroll > 0) {
+                    scroll = 0;
+                }
+                $footer.animate({
+                    marginLeft: scroll + "px"
+                }, 200);
+            }
+            if (args.target.id === "footer_scroll_right") {
+                scroll = w.parseInt($("#footer").css("margin-left"), 10) - 512;
+                $footer.animate({
+                    marginLeft: scroll + "px"
+                }, 200);
             }
         }
     });

@@ -9,8 +9,15 @@
     <div id="right_pin" class="pin_off"></div>
     <br>
 </div>
-<div id="header"></div>
-<div id="footer"></div>
+<div id="header">
+    <div id="header_scroll_left"></div>
+    <div id="header_scroll_right"></div>
+</div>
+<div id="footer_wrap">
+    <div id="footer_scroll_left"></div>
+    <div id="footer"></div>
+    <div id="footer_scroll_right"></div>
+</div>
 
 <style type="text/css">
 #header{
@@ -23,6 +30,7 @@
     z-index: 1000;
     padding: 0 48px;
 }
+
 
 #left{
     height: 100%;
@@ -38,6 +46,7 @@
     z-index: 1000;
 }
 
+
 #right{
     height: 100%;
     position: absolute;
@@ -51,7 +60,12 @@
     margin-right: -208px;
 }
 
+
 #footer{
+    width: 6000px;
+    padding: 0 20px;
+}
+#footer_wrap{
     background-color: #BBBBCC;
     height: 48px;
     width: 100%;
@@ -59,8 +73,26 @@
     position: absolute;
     bottom: 0;
     overflow: hidden;
+    width: 100%;
     z-index: 1001;
 }
+#footer_scroll_left,
+#footer_scroll_right{
+    height: 256px;
+    position: absolute;
+    vertical-align: middle;
+    width: 20px;
+    cursor: pointer;
+}
+#footer_scroll_left{
+    left: 0px;
+    background: url("../img/frame.png") no-repeat scroll 0 center #666677;
+}
+#footer_scroll_right{
+    right: 0px;
+    background: url("../img/frame.png") no-repeat scroll -20px center #666677;
+}
+
 
 #center{
     background-color: #FFFFFF;
