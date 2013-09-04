@@ -40,42 +40,6 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             }
 
             return grp;
-        },
-
-        /**
-         * Send update data to the server
-         * @method send
-         * @paarm {String} df Design document function (ins/add/sav/del/tra)
-         * @param {Object} data Data to send
-         * @param {Function} suc Callback for success (optional)
-         * @param {Function} err Callback for error (optional)
-         * @return {this}
-         */
-        send = function (df, name, data, suc, err) {
-            var that = this;
-            data.nm = ext.usr;
-
-            $.ajax({
-                type: "POST",
-                url: "/" + ext.def.project + "/_design/" + ext.def.fw + "/_update/" + df + "/" + name,
-
-                data: data,
-
-                timeout: ext.def.HTTP_TIMEOUT,
-
-                success: function () {
-                    if (suc) {
-                        suc.apply(that, arguments);
-                    }
-                },
-                error : function () {
-                    if (err || suc) {
-                        (err || suc).apply(that, arguments);
-                    }
-                }
-            });
-
-            return this;
         };
 
 
@@ -125,7 +89,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             }
             data = _.extend(_.extend({}, this.attributes), data);
 
-            send.call(this, "ins", this.name, data, suc, err);
+            ext.send.call(this, "ins", this.name, data, suc, err);
             return this;
         },
 
@@ -145,7 +109,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             }
             data = _.extend(_.extend({}, this.attributes), data);
 
-            send.call(this, "sav", this.name, data, suc, err);
+            ext.send.call(this, "sav", this.name, data, suc, err);
             return this;
         },
 
@@ -168,7 +132,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             // replace guid to clone the data
             data.guid = this.name + "_" + ext.genGuid();
 
-            send.call(this, "sav", this.name, data, suc, err);
+            ext.send.call(this, "sav", this.name, data, suc, err);
             return this;
         },
 
@@ -188,7 +152,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             }
             data = _.extend(_.extend({}, this.attributes), data);
 
-            send.call(this, "del", this.name, data, suc, err);
+            ext.send.call(this, "del", this.name, data, suc, err);
             return this;
         },
 
@@ -214,7 +178,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
             data.from = this.get("grp");
 
-            send.call(this, "tra", this.name, data, suc, err);
+            ext.send.call(this, "tra", this.name, data, suc, err);
             return this;
         },
 
@@ -255,7 +219,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 });
             }
 
-            send.call(this, "sav", this.name, data, suc, err);
+            ext.send.call(this, "sav", this.name, data, suc, err);
 
             return this;
         },
@@ -508,7 +472,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @return {this}
          */
         send: function () {
-            send.apply(this, arguments);
+            ext.send.apply(this, arguments);
             return this;
         },
 
@@ -532,7 +496,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 grp: grp
             });
 
-            send.call(this, "shu", this.prototype.name, {
+            ext.send.call(this, "shu", this.prototype.name, {
                 grp: grp
             }, suc, err);
 
@@ -586,7 +550,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 data.idx = 0;
             }
 
-            send.call(this, "tra", this.prototype.name, data, suc, err);
+            ext.send.call(this, "tra", this.prototype.name, data, suc, err);
 
             return this;
         },
@@ -619,7 +583,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 return this;
             }
 
-            send.call(this, "traAll", this.prototype.name, data, suc, err);
+            ext.send.call(this, "traAll", this.prototype.name, data, suc, err);
 
             return this;
         },
@@ -644,7 +608,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             }
             data.grp = grp;
 
-            send.call(this, "traBac", this.prototype.name, data, suc, err);
+            ext.send.call(this, "traBac", this.prototype.name, data, suc, err);
 
             return this;
         },
@@ -666,7 +630,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             }
             data.grp = grp;
 
-            send.call(this, "resTem", this.prototype.name, data, suc, err);
+            ext.send.call(this, "resTem", this.prototype.name, data, suc, err);
             return this;
         },
 
@@ -695,7 +659,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
                 data.data.push(models.at(i).attributes);
             }
 
-            send.call(this, method, name, data, suc, err);
+            ext.send.call(this, method, name, data, suc, err);
 
             return this;
         },

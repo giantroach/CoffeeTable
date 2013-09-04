@@ -1,0 +1,59 @@
+<div id="log">
+    <div id="log_wrap_tbl">
+        <table id="log_tbl">
+            <colgroup>
+                <col>
+                <col>
+            </colgroup>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div>
+        <input id="log_message" type="text">
+        <button id="log_send" type="button">Send</button>
+    </div>
+</div>
+
+<style type="text/css">
+#log_wrap_tbl{
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 102px;
+    cursor: move;
+}
+
+#log_tbl{
+    height: 102px;
+    color: #FFFFFF;
+    font-size: small;
+}
+
+#log_tbl .system{
+    color: #8888FF;
+}
+
+#log_tbl .nm{
+    vertical-align: top;
+}
+
+#log{
+    bottom: 0;
+    position: absolute;
+    right: 0;
+    z-index: 3000;
+
+    filter: alpha(opacity=75);
+    opacity: 0.75;
+
+    height: 128px;
+    width: 256px;
+    background-color: #000000;
+}
+
+#log_message{
+    width: 192px;
+}
+#log_send{
+    width: 48px;
+}
+</style>

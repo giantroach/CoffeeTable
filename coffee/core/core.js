@@ -322,6 +322,43 @@ var coffee = (function (ext) {
             };
         }()),
 
+        /**
+         * Send update data to the server
+         * @method send
+         * @paarm {String} df Design document function (ins/add/sav/del/tra)
+         * @param {String} name db name
+         * @param {Object} data Data to send
+         * @param {Function} suc Callback for success (optional)
+         * @param {Function} err Callback for error (optional)
+         * @return {this}
+         */
+        send : function (df, name, data, suc, err) {
+            var that = this;
+            data.nm = this.usr;
+
+            $.ajax({
+                type: "POST",
+                url: "/" + def.project + "/_design/" + def.fw + "/_update/" + df + "/" + name,
+
+                data: data,
+
+                timeout: def.HTTP_TIMEOUT,
+
+                success: function () {
+                    if (suc) {
+                        suc.apply(that, arguments);
+                    }
+                },
+                error : function () {
+                    if (err || suc) {
+                        (err || suc).apply(that, arguments);
+                    }
+                }
+            });
+
+            return this;
+        },
+
         // collections
         cs: {},
 
@@ -373,6 +410,12 @@ var coffee = (function (ext) {
             this.c.Login.start(function () {
                 that.c.Frame.setup(function () {
                     that.startPolling();
+                });
+                that.c.Log.setup(function () {
+                    that.c.Log.send({
+                        text: that.usr + ' is logged in.',
+                        type: "system"
+                    });
                 });
             });
 
