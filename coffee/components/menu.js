@@ -60,6 +60,12 @@ coffee.include("Menu", "menu.html", ["Component"], function (name, ext) {
             if (handler) {
                 component = ext.c[handler.component];
                 component[handler.method].apply(component, handler.args);
+
+                // write log
+                ext.c.Log.send({
+                    type: "action",
+                    text: this.$el.text().replace(/[\n\r]/g, "")
+                });
             }
         }
     });
