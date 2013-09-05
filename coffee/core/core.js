@@ -28,6 +28,12 @@ var coffee = (function (ext) {
         return false;
     });
 
+    //restrict html scroll (caused by draggable)
+    $(d).bind("scroll", function () {
+        this.documentElement.scrollLeft = 0;
+        this.documentElement.scrollTop = 0;
+    });
+
 
     return {
         $: $,

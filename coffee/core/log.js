@@ -154,7 +154,8 @@ coffee.include("Log", "../core/log.html", [], function (name, ext) {
 
             // draggable
             this.$el.draggable({
-                handle: "#log_tbl"
+                handle: "#log_tbl",
+                containment: "parent"
             });
 
             // destroy
