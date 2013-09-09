@@ -66,12 +66,12 @@ It's also possible that there will be multiple changes sent back.
       dataType: 'json',
       success: function(data) {
         // Now we need to see what to do with the data.
-        if (data.results.length) {
+        if (data && data.results.length) {
           $(document).trigger('longpoll-data', [database, data.results]);
           $(document).trigger('longpoll-data-' + database, [data.results]);
         }
         // And set up the re-run of the fetch query.
-        longpoll(database, data.last_seq);
+        longpoll(database, data ? data.last_seq : last_seq);
       }
     })
   }
