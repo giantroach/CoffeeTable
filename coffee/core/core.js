@@ -4,7 +4,8 @@
 var coffee = (function (ext) {
     "use strict";
 
-    var $ = ext.jQuery,
+    var core,
+        $ = ext.jQuery,
         _ = ext._,
         Backbone = ext.Backbone,
 
@@ -35,7 +36,7 @@ var coffee = (function (ext) {
     });
 
 
-    return {
+    core = {
         $: $,
         _: _,
         Backbone: Backbone,
@@ -340,7 +341,7 @@ var coffee = (function (ext) {
          */
         send : function (df, name, data, suc, err) {
             var that = this;
-            data.nm = this.usr;
+            data.nm = core.usr;
 
             $.ajax({
                 type: "POST",
@@ -428,6 +429,8 @@ var coffee = (function (ext) {
             return this;
         }
     };
+
+    return core;
 
 }({
     //library
