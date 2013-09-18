@@ -256,7 +256,11 @@ EndFunc
 Func curl($opts)
     Local $pid = Run("curl.exe " & $opts, @ScriptDir, @SW_HIDE, $STDERR_CHILD + $STDOUT_CHILD)
 
-    GUICtrlSetData($edi_log, "curl.exe " & $opts & @CRLF, True)
+    if StringInStr($opts, "@") Then
+        GUICtrlSetData($edi_log, "curl.exe " & StringRegExpReplace($opts, "[^:]+@", "XXXXXXXX@") & @CRLF, True)
+    Else
+        GUICtrlSetData($edi_log, "curl.exe " & $opts & @CRLF, True)
+    EndIf
 
     Return $pid
 EndFunc
