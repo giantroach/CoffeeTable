@@ -170,7 +170,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         /**
          * Send transfer data to the server
          * @method sendTra
-         * @param {Object} data
+         * @param {Object} data (optional)
          * <ul>
          * <li>{String}to: Destination grp.</li>
          * <li>{Strin}override: Override data.</li>
@@ -598,7 +598,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * Transfer multiple targes
          * @method sendTraAll
          * @param {String} grp
-         * @param {Object} data
+         * @param {Object} data (optional)
          * <ul>
          * <li>{String}to: Destination grp.</li>
          * <li>{String}dest: Destination element ID to override (optional)</li>
@@ -633,9 +633,9 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @method sendTraBac
          * @param {String} grp
          * @param {String} data (optional)
-         * <li>
+         * <ul>
          * <li>{Object}override: override data (optional)</li>
-         * </li>
+         * </ul>
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
@@ -727,6 +727,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @param {String} grp
          * @param {Function} suc
          * @param {Function} err
+         * @return {this}
          * @static
          */
         show: function (grp, suc, err) {

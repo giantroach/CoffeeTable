@@ -26,7 +26,12 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
         /**
          * @method genNewGrpStr
          * @param {String} grp
-         * @param {Object} param
+         * @param {Object} param (optional)
+         * <ul>
+         * <li>{String}state: Status</li>
+         * <li>{String}usr: User name</li>
+         * </ul>
+         * @return {String}
          * @private
          */
         genNewGrpStr = function (grp, param) {
@@ -52,10 +57,24 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
      * @constructor
      */
     m[name] = ext.m.Component.extend({
+        /**
+         * Generate group name string.
+         * @method genNewGrpStr
+         * @param {Object} param (optional)
+         * <ul>
+         * <li>{String}state: Status</li>
+         * <li>{String}usr: User name</li>
+         * </ul>
+         * @return {String}
+         */
         genNewGrpStr: function (param) {
             return genNewGrpStr(this.get("grp"), param);
         },
 
+        /**
+         * Play this card to the center of table
+         * @method play
+         */
         play: function () {
             var centerPos,
                 grp = this.genNewGrpStr({
@@ -82,6 +101,11 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
             });
         },
 
+        /**
+         * Set facedown status on and play the card.
+         * @method playFacedown
+         * @return {this}
+         */
         playFacedown: function () {
             this.set("facedown", true);
             this.sendSav({}, function () {
@@ -90,12 +114,22 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
             return this;
         },
 
+        /**
+         * Set facedown status off.
+         * @method faceup
+         * @return {this}
+         */
         faceup: function () {
             this.set("facedown", "");
             this.sendSav();
             return this;
         },
 
+        /**
+         * Discard the card
+         * @method discard
+         * @return {this}
+         */
         discard: function () {
             var grp = this.genNewGrpStr({
                 state: "discarded"
@@ -115,6 +149,10 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
             return this;
         },
 
+        /**
+         * Take the card into ur hand
+         * @method take
+         */
         take: function () {
             var grp = this.genNewGrpStr({
                 usr: ext.usr
@@ -225,7 +263,7 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
         },
 
         /**
-         * Draw a card (same as c.component.Sendtake)
+         * Draw a card (same as c.component.sendTake)
          * @method draw
          * @return
          * @static
@@ -239,7 +277,7 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
          * @method initDraw
          * @param {String} from grp
          * @param {String} to (optional) if not specified, u draw to ur hand
-         * @param {Object} override(optional)
+         * @param {Object} override (optional)
          * @param {Function} suc
          * @param {Function} err
          * @return {this}
