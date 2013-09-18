@@ -1,6 +1,12 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global coffee */
 
+/**
+ * @module Frame
+ * @namespace coffee
+ * @requires Component
+ */
+
 coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext) {
     "use strict";
 
@@ -197,14 +203,27 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
 
     /**
      * Model
+     * @class m.Frame
+     * @submodule Backbone.Model
      */
     m[name] = Backbone.Model.extend({
     });
 
-    // Collection
+
+    /**
+     * Collection
+     * @class c.Frame
+     * @submodule Backbone.Collection
+     */
     c[name] = Backbone.Collection.extend({
         $dest: $("body")
     }, {
+        /**
+         * Render frame. (Internal use)
+         * @method setup
+         * @param {Function} callback
+         * @return {Object}
+         */
         setup: function (callback) {
             var col = new this(),
                 mod = (new ext.v[name]({}, col)).model;
@@ -214,9 +233,14 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         },
 
         /**
-         * @method getWinsize
-         * @param {Object}} box Boxed object size (optional)
-         * @return {Object} 
+         * Get center coodinate of screen
+         * @method getCenterCoordinate
+         * @param {Object} box Boxed object size (optional)
+         * <ul>
+         * <li>width:{Number}</li>
+         * <li>height:{Number}</li>
+         * </ul>
+         * @return {Object}
          */
         getCenterCoordinate: function (box) {
             if (!box) {
@@ -234,7 +258,12 @@ coffee.include("Frame", "../core/frame.html", ["Component"], function (name, ext
         }
     });
 
-    // View
+
+    /**
+     * View
+     * @class v.Frame
+     * @submodule Backbone.View
+     */
     v[name] = Backbone.View.extend({
         events: {
             "click": "click"

@@ -1,6 +1,11 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global jQuery, _, Backbone */
 
+/**
+ * @module coffee
+ * @class coffee
+ */
+
 var coffee = (function (ext) {
     "use strict";
 
@@ -130,7 +135,7 @@ var coffee = (function (ext) {
         },
 
         /**
-         * Include component into coffee name space
+         * Load html from given uri
          * @method include_html
          * @param {String} uri
          * @param {Function} func
@@ -145,8 +150,8 @@ var coffee = (function (ext) {
         },
 
         /**
-         * Include component into coffee name space
-         * @method include
+         * Execute given func to generate actual object and append it into coffee name space
+         * @method include_js
          * @param {String} name
          * @param {Function} func
          * @return {this}
@@ -232,7 +237,7 @@ var coffee = (function (ext) {
         }()),
 
         /**
-         * subscribe event related to document
+         * Subscribe event related to document
          * @method onDoc
          * @param {String} event Event name like "click"
          * @param {String} callback Callback function
@@ -259,7 +264,7 @@ var coffee = (function (ext) {
         }()),
 
         /**
-         * subscribe window resize event.
+         * Subscribe window resize event.
          * @method onResize
          * @param callback {Function}
          * @return {this}
@@ -332,7 +337,7 @@ var coffee = (function (ext) {
         /**
          * Send update data to the server
          * @method send
-         * @paarm {String} df Design document function (ins/add/sav/del/tra)
+         * @param {String} df Design document function (ins/sav/del/tra/shu/savAll/delAll/traAll/traBac/resTem)
          * @param {String} name db name
          * @param {Object} data Data to send
          * @param {Function} suc Callback for success (optional)
@@ -393,6 +398,7 @@ var coffee = (function (ext) {
         }()),
 
         /**
+         * Start framework
          * @method letsPlay
          * @return {this}
          */

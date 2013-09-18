@@ -1,6 +1,12 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global coffee */
 
+/**
+ * @module Contextmenu
+ * @namespace coffee
+ * @requires Component
+ */
+
 coffee.include("Contextmenu", "contextmenu.html", ["Component"], function (name, ext) {
     "use strict";
 
@@ -19,6 +25,9 @@ coffee.include("Contextmenu", "contextmenu.html", ["Component"], function (name,
 
     /**
      * Model
+     * @class m.Contextmenu
+     * @submodule m.Component
+     * @constructor
      */
     m[name] = ext.m.Component.extend({
         init: function () {
@@ -41,11 +50,20 @@ coffee.include("Contextmenu", "contextmenu.html", ["Component"], function (name,
         }
     });
 
-    // Collection
+
+    /**
+     * Collection
+     * @class c.Contextmenu
+     * @submodule c.Component
+     * @constructor
+     */
     c[name] = ext.c.Component.extend({
     }, {
         /**
-         * hide all contextmenu
+         * Hide all contextmenu
+         * @method hideAll
+         * @return {this}
+         * @static
          */
         hideAll: function () {
             _.each(this.children[name], function (model) {
@@ -57,7 +75,13 @@ coffee.include("Contextmenu", "contextmenu.html", ["Component"], function (name,
         }
     });
 
-    // View
+
+    /**
+     * View
+     * @class v.Contextmenu
+     * @submodule v.Component
+     * @constructor
+     */
     v[name] = ext.v.Component.extend({
         noAnim: true,
 

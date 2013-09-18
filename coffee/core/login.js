@@ -1,6 +1,11 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global coffee */
 
+/**
+ * @module Login
+ * @namespace coffee
+ */
+
 coffee.include("Login", "../core/login.html", [], function (name, ext) {
     "use strict";
 
@@ -15,16 +20,30 @@ coffee.include("Login", "../core/login.html", [], function (name, ext) {
 
     /**
      * Model
+     * @class m.Login
+     * @submodule Backbone.Model
+     * @constructor
      */
     m[name] = Backbone.Model.extend({
     });
 
-    // Collection
+
+    /**
+     * Collection
+     * @class c.Login
+     * @submodule Backbone.Collection
+     * @constructor
+     */
     c[name] = Backbone.Collection.extend({
         $dest: $("body")
     }, {
 
-        //start
+        /**
+         * Render logs. (Internal use)
+         * @method start
+         * @param {Function} callback Callback function (optional)
+         * @static
+         */
         start: function (callback) {
             var c = new this(),
                 m = (new ext.v[name]({}, c)).model;
@@ -36,7 +55,13 @@ coffee.include("Login", "../core/login.html", [], function (name, ext) {
 
     });
 
-    // View
+
+    /**
+     * View
+     * @class v.Login
+     * @submodule Backbone.View
+     * @constructor
+     */
     v[name] = Backbone.View.extend({
         initialize: function (opt, c) {
             var that = this;

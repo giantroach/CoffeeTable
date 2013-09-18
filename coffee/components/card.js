@@ -6,6 +6,12 @@
 // grp_$state$ > card is in a "state" and not binded to any user
 // grp_$state$_$user > card is in a "state" also binded to the user (played face-down)
 
+
+/**
+ * @module Card
+ * @namespace coffee
+ */
+
 coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name, ext) {
     "use strict";
 
@@ -21,6 +27,7 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
          * @method genNewGrpStr
          * @param {String} grp
          * @param {Object} param
+         * @private
          */
         genNewGrpStr = function (grp, param) {
             grp = grp
@@ -40,6 +47,9 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
 
     /**
      * Model
+     * @class m.Card
+     * @submodule m.Component
+     * @constructor
      */
     m[name] = ext.m.Component.extend({
         genNewGrpStr: function (param) {
@@ -124,7 +134,13 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
         }
     });
 
-    // Collection
+
+    /**
+     * Collection
+     * @class c.Card
+     * @submodule c.Component
+     * @constructor
+     */
     c[name] = ext.c.Component.extend({
         contextmenu: {
             items: [
@@ -159,6 +175,7 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
          * @param {String} grp
          * @param {String} withoutShuffle (optional)
          * @return {this}
+         * @static
          */
         resetDeck: function (grp, withoutShuffle) {
             var that = this;
@@ -176,8 +193,9 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
          * Reset target deck
          * @method resetDeck
          * @param {String} grp
-         * @param {shuffle}
+         * @param {shuffle} shuffle
          * @return {this}
+         * @static
          */
         shuffleIntoDeck: function (grp, shuffle) {
             var that = this,
@@ -196,6 +214,7 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
          * Put all discarded cards into a deck and shuffle again
          * @method reShuffle
          * @param {String} grp
+         * @static
          */
         reShuffle: function (grp) {
             this.sendTraAll(grp + "_$discarded$", {
@@ -205,12 +224,18 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
             return this;
         },
 
+        /**
+         * Draw a card (same as c.component.Sendtake)
+         * @method draw
+         * @return
+         * @static
+         */
         draw: function () {
             this.sendTake.apply(this, arguments);
         },
 
         /**
-         * draw init card, and refill the init deck
+         * Draw init card, and refill the init deck
          * @method initDraw
          * @param {String} from grp
          * @param {String} to (optional) if not specified, u draw to ur hand
@@ -218,6 +243,7 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
          * @param {Function} suc
          * @param {Function} err
          * @return {this}
+         * @static
          */
         initDraw: function (from, to, override, suc, err) {
             var that = this;
@@ -248,7 +274,13 @@ coffee.include("Card", "card.html", ["Component", "Contextmenu"], function (name
         }
     });
 
-    // View
+
+    /**
+     * View
+     * @class v.Card
+     * @submodule v.Component
+     * @constructor
+     */
     v[name] = ext.v.Component.extend({
         defData: {
             title: "",

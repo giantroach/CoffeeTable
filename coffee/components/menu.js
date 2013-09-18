@@ -1,17 +1,20 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global coffee */
 
+// Menu definition format
+// <p>"click"<p>
+// <ul>
+// <li>"component": Component name</li>
+// <li>"method": Method name (collection)</li>
+// <li>"args": Arguments array</li>
+// </ul>
+
 
 /**
- * Menu definition format
- * <p>"click"<p>
- * <ul>
- * <li>"component": Component name</li>
- * <li>"method": Method name (collection)</li>
- * <li>"args": Arguments array</li>
- * </ul>
+ * @module Menu
+ * @namespace coffee
+ * @requires Component
  */
-
 
 coffee.include("Menu", "menu.html", ["Component"], function (name, ext) {
     "use strict";
@@ -27,11 +30,20 @@ coffee.include("Menu", "menu.html", ["Component"], function (name, ext) {
 
     /**
      * Model
+     * @class m.Menu
+     * @submodule m.Component
+     * @constructor
      */
     m[name] = ext.m.Component.extend({
     });
 
-    // Collection
+
+    /**
+     * Collection
+     * @class c.Menu
+     * @submodule c.Component
+     * @constructor
+     */
     c[name] = ext.c.Component.extend({
         destTag: "ul",
         afterRefresh: function () {
@@ -39,7 +51,13 @@ coffee.include("Menu", "menu.html", ["Component"], function (name, ext) {
         }
     });
 
-    // View
+
+    /**
+     * View
+     * @class v.Menu
+     * @submodule v.Component
+     * @constructor
+     */
     v[name] = ext.v.Component.extend({
         // html definition
         tagName: "li",

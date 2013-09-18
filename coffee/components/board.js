@@ -1,6 +1,12 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global coffee */
 
+/**
+ * @module Board
+ * @namespace coffee
+ * @requires Component
+ */
+
 coffee.include("Board", "board.html", ["Component"], function (name, ext) {
     "use strict";
 
@@ -15,14 +21,31 @@ coffee.include("Board", "board.html", ["Component"], function (name, ext) {
         v = {};
 
 
-    // Model
+    /**
+     * Model
+     * @class m.Board
+     * @submodule m.Component
+     * @constructor
+     */
     m[name] = ext.m.Component.extend({
     });
 
-    // Collection
+
+    /**
+     * Collection
+     * @class c.Board
+     * @submodule c.Component
+     * @constructor
+     */
     c[name] = ext.c.Component.extend();
 
-    // View
+
+    /**
+     * View
+     * @class v.Board
+     * @submodule v.Component
+     * @constructor
+     */
     v[name] = ext.v.Component.extend({
     });
 

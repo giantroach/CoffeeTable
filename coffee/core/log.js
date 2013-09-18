@@ -1,6 +1,11 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global coffee */
 
+/**
+ * @module Log
+ * @namespace coffee
+ */
+
 coffee.include("Log", "../core/log.html", [], function (name, ext) {
     "use strict";
 
@@ -29,14 +34,30 @@ coffee.include("Log", "../core/log.html", [], function (name, ext) {
 
     /**
      * Model
+     * @class m.Log
+     * @submodule Backbone.Model
+     * @constructor
      */
     m[name] = Backbone.Model.extend({
     });
 
-    // Collection
+
+    /**
+     * Collection
+     * @class c.Log
+     * @submodule Backbone.Collection
+     * @constructor
+     */
     c[name] = Backbone.Collection.extend({
         $dest: $("body")
     }, {
+        /**
+         * Render log. (Internal use)
+         * @method setup
+         * @param {Function} callback (callback)
+         * @return {Object}
+         * @static
+         */
         setup: function (callback) {
             var col = new this(),
                 mod = (new ext.v[name]({}, col)).model;
@@ -49,7 +70,11 @@ coffee.include("Log", "../core/log.html", [], function (name, ext) {
         },
 
 
-        //callback for doc update
+        /**
+         * Callback for doc update
+         * @method refresh
+         * @static
+         */
         refresh: function () {
             $.couch.db(ext.def.project).openDoc(name, {
                 success: function (res) {
@@ -103,14 +128,16 @@ coffee.include("Log", "../core/log.html", [], function (name, ext) {
 
 
         /**
+         * Send log message
          * @method send
-         * @param {Object} obj
+         * @param {Object} obj Message content
          * <ul>
          * <li>text: to send (optional)</li>
          * <li>type: log type (optional)</li>
          * <li>nm: user name (optional)</li>
          * </ul>
          * @return {this}
+         * @static
          */
         send: function (obj) {
             var text, type, nm,
@@ -134,7 +161,13 @@ coffee.include("Log", "../core/log.html", [], function (name, ext) {
         }
     });
 
-    // View
+
+    /**
+     * View
+     * @class v.Log
+     * @submodule Backbone.View
+     * @constructor
+     */
     v[name] = Backbone.View.extend({
         events: {
             "click": "click",

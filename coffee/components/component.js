@@ -1,6 +1,11 @@
 /*jslint browser: true, nomen: true, indent: 4 */
 /*global coffee */
 
+/**
+ * @module Component
+ * @namespace coffee
+ */
+
 coffee.include("Component", "components.html", [], function (name, ext) {
     "use strict";
 
@@ -26,6 +31,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @method genNewGrpStr
          * @param {String} grp
          * @param {Object} param
+         * @private
          */
         genNewGrpStr = function (grp, param) {
             grp = grp
@@ -43,7 +49,12 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         };
 
 
-    // Model --------------------------------
+    /**
+     * Model
+     * @class m.Component
+     * @submodule Backbone.Model
+     * @constructor
+     */
     m[name] = Backbone.Model.extend({
 
         url: "/" + ext.def.project + "/" + ext.def.fw + "/" + name,
@@ -162,7 +173,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @param {Object} data
          * <ul>
          * <li>{String}to: Destination grp.</li>
-         * <li></li>
+         * <li>{Strin}override: Override data.</li>
          * </ul>
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
@@ -184,8 +195,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
         /**
          * Clone and transfer
-         * @method cloTra
-         * @param {Object} data
+         * @method sendCloTra
+         * @param {Object} data Optional data.
          * <ul>
          * <li>{String}to: Destination grp (optional) draw to ur hand if not specified.</li>
          * <li>{Boolean}play: If it to play.</li>
@@ -227,7 +238,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         /**
          * Callback handler for data update
          * @method refresh
-         * @param {Object}} data
+         * @param {Object} data
          * @return {this}
          */
         refresh: function (data) {
@@ -236,7 +247,9 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         },
 
         /**
-         * Rotate option
+         * Rotate 90 degree to the right
+         * @method rotate
+         * @return {Number} new degree
          */
         rotate: function () {
             var rotate = Number(this.get("rotate")) + 90;
@@ -251,7 +264,10 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         },
 
         /**
-         * show context menu
+         * Show context menu
+         * @method contextmenu
+         * @param {Number} x
+         * @param {Number} y
          */
         contextmenu: function (x, y) {
             var contextmenu = this.c.getContextMenu();
@@ -265,7 +281,13 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         }
     });
 
-    // Collection
+
+    /**
+     * Collection
+     * @class c.Component
+     * @submodule Backbone.Collection
+     * @constructor
+     */
     c[name] = Backbone.Collection.extend({
         initialize: function (models, grp) {
             // do not fix the model as context menu can be added to the collection.
@@ -274,6 +296,11 @@ coffee.include("Component", "components.html", [], function (name, ext) {
             this.constructor.children[this.name][this.grp] = this;
         },
 
+        /**
+         * Get corresponding context menu
+         * @method getContextMenu
+         * @return {Object}
+         */
         getContextMenu: function () {
             return this.filter(function (model) {
                 return model.name === "Contextmenu";
@@ -281,12 +308,19 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         }
 
     }, {
+        /**
+         * Check if the given group name is yours.
+         * @method isMine
+         * @param {String} str Group name to be checked.
+         * @requires {Boolean}
+         * @static
+         */
         isMine: (function () {
             var rx;
 
             return function (str) {
                 if (!rx) {
-                    // make delay for define ext.usr
+                    // make delay for ext.usr to be defined
                     rx = new RegExp("(^[^\\$]+$)|(_\\$[^_]+\\$$)|(_\\$" + ext.usr + ")$");
                 }
                 return rx.test(str);
@@ -295,6 +329,8 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
         /**
          * Send query to iterate and refresh all belonging models
+         * @method refresh
+         * @static
          */
         refresh: function () {
             var c,
@@ -465,11 +501,12 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         /**
          * Send update data to the server
          * @method send
-         * @paarm {String} df Design document function (ins/add/sav/del/tra)
+         * @param {String} df Design document function (ins/add/sav/del/tra)
          * @param {Object} data Data to send
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
+         * @static
          */
         send: function () {
             ext.send.apply(this, arguments);
@@ -479,11 +516,12 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         /**
          * Send shuffle request to the server
          * @method sendShu
-         * @param {String} grp
+         * @param {String} grp Group name
          * @param {Object} data override data
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
+         * @static
          */
         sendShu: function (grp, data, suc, err) {
             if (!data) {
@@ -515,6 +553,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @param {Function} suc (optional)
          * @param {Function} err (optional)
          * @return {this}
+         * @static
          */
         sendTake: function (grp, data, suc, err) {
             var centerPos;
@@ -569,6 +608,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
+         * @static
          */
         sendTraAll: function (grp, data, suc, err) {
             if (!data) {
@@ -599,6 +639,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
+         * @static
          */
         sendTraBac: function (grp, data, suc, err) {
             if (!data) {
@@ -621,6 +662,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for error (optional)
          * @return {this}
+         * @static
          */
         sendResTem: function (grp, data, suc, err) {
             if (!data) {
@@ -642,6 +684,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @param {Function} suc Callback for success (optional)
          * @param {Function} err Callback for err (optional)
          * @return {this}
+         * @static
          */
         updateAll: function (method, grp, vals, suc, err) {
             var i, max,
@@ -671,6 +714,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @param {Function} suc
          * @param {Function} err
          * @return {this}
+         * @static
          */
         hide: function (grp, suc, err) {
             this.updateAll("savAll", grp, { "hide": true }, suc, err);
@@ -683,6 +727,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
          * @param {String} grp
          * @param {Function} suc
          * @param {Function} err
+         * @static
          */
         show: function (grp, suc, err) {
             this.updateAll("savAll", grp, { "hide": "" }, suc, err);
@@ -690,7 +735,13 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         }
     });
 
-    // View --------------------------------
+
+    /**
+     * View
+     * @class v.Component
+     * @submodule Backbone.View
+     * @constructor
+     */
     v[name] = Backbone.View.extend({
         // template must be overridden
         template: "",
