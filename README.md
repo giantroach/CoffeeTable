@@ -1,7 +1,7 @@
 ![CoffeeTable](img/logo512.png)
 ===========
 
-Board game prototyping tool project
+**Board game prototyping tool project**
 
 When some board game idea is popped in your mind, you should want to see if it's worth to make it real.
 Even though, printing out all the images by ur personal printer, cut the paper, find some mistakes, print them again...
@@ -16,3 +16,7 @@ CoffeeTable doesn't aim to provide a great service to customers.
 In fact, this doesn't provide any security stuff.
 If you know Javascript and debugger, you easily can cheat your friend.
 (but in prototyping point of view, it shouldn't be really a matter)
+
+See [Wiki](https://github.com/giantroach/CoffeeTable/wiki) for more information.
+
+![sample image](https://raw.github.com/wiki/giantroach/CoffeeTable/img/screen_sample.jpg)
