@@ -8,9 +8,9 @@ Even though, printing out all the images by ur personal printer, cut the paper, 
 And finally call friends for the test etc.. is sometimes disgusting.
 (And you might know, the first shape of idea tends to be rubbish)
 
-CoffeeTable aims to share your board game prototyping easily along with your frineds, without calling them to your home.
+CoffeeTable aims to share your board game prototype easily with your friends, without calling them to your home.
 You just need a CouchDB server, and a web browser to use this.
-And moreover, your friend only need web browser with no-plugin stuff!
+Moreover, your friend only need web browser with no-plugin stuff!
 
 CoffeeTable doesn't aim to provide a great service to customers.
 In fact, this doesn't provide any security stuff.
