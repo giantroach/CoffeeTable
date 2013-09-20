@@ -103,20 +103,26 @@ Func readDef($url, $port, $user, $password, $db)
             $doc = StringRegExpReplace($line, "^\[([^\]]+)\]$", "\1")
             GUICtrlSetData($edi_log, @CRLF & "-------- " & $doc & " --------" & @CRLF, True)
             $rev = ""
+            $stdout = ""
 
         ElseIf StringRegExp($line, "^[^=]+=.+") Then
             ; data is found
             $field = StringRegExpReplace($line, "^([^=]+)=.+$", "\1")
             $data = StringRegExpReplace($line, "^[^=]+=(.+)$", "\1")
 
-            if Not($rev) Then
-                $rev = findRev(readStdOut(curl(buildCurlParam($url, $port, $db, $doc, $user, $password, "GET", "", "", ""))))
-                if (StringInStr($rev, '{"error":')) Then
-                    $rev = ""
-                EndIf
+            $stdout = readStdOut(curl(buildCurlParam($url, $port, $db, $doc, $user, $password, "GET", "", "", "")))
+            $rev = findRev($stdout)
+            if (StringInStr($rev, '{"error":')) Then
+                $rev = ""
+                $stdout = ""
             EndIf
 
-            $rev = findRev(readStdOut(curl(buildCurlParam($url, $port, $db, $doc, $user, $password, "PUT", makeJsonString('{"' & $field & '":' & $data & '}'), "", $rev))))
+            If ($stdout) Then
+                $stdout = readStdOut(curl(buildCurlParam($url, $port, $db, $doc, $user, $password, "PUT", makeJsonString($field, $data, $stdout), "", $rev)))
+            Else
+                $stdout = readStdOut(curl(buildCurlParam($url, $port, $db, $doc, $user, $password, "PUT", makeJsonString($field, $data, ""), "", $rev)))
+            EndIf
+            $rev = findRev($stdout)
             Sleep(100)
 
         ElseIf StringRegExp($line, "^@.+\.json$") Then
@@ -150,15 +156,21 @@ EndFunc
 
 ;
 ; @method makeJsonString
-; @param {String} str
+; @param {String} $str
+; @param {String} $curData Data which currently stored in the document
 ; @return {String}
 ;
-Func makeJsonString($str)
+Func makeJsonString($field, $data, $curData)
     Local $formatted = ""
 
-    $formatted = $formatted & '"'
-    $formatted = $formatted & StringReplace($str, '"', '\"')
-    $formatted = $formatted & '"'
+    If ($curData) Then
+        $formatted = StringRegExpReplace($curData, '(^{)(.+)$', '\1"' & $field & '":' & $data & ',\2')
+    Else
+        $formatted = '{"' & $field & '":' & $data & '}'
+    EndIf
+
+    $formatted = StringReplace($formatted, '"', '\"')
+    $formatted = '"' & $formatted & '"'
 
     Return $formatted
 EndFunc
@@ -190,7 +202,7 @@ Func buildCurlParam($url, $port, $db, $document, $user, $password, $method, $dat
     ; Data
     if ($data) Then
         If ($rev) Then
-            $data = StringRegExpReplace($data, "^(\{)(.*)$", ('\1"_rev":"' & $rev & '",\2'))
+            $data = StringRegExpReplace($data, '^("\{)(.*)$', ('"{\\"_rev\\":\\"' & $rev & '\\",\2'))
         EndIf
         $param = $param & " -d " & $data
     EndIf
@@ -293,6 +305,8 @@ Func readStdOut($pid)
         EndIf
     Wend
 
+    ; trim unnecessary CRLF like character
+    $output = StringLeft($output, StringLen($output) - 1)
     GUICtrlSetData($edi_log, $output & @CRLF, True)
     Return $output
 EndFunc
@@ -304,7 +318,10 @@ EndFunc
 ; @return {String}
 ;
 Func findRev($stdout)
-    Return StringRegExpReplace($stdout, '.+"_?rev":"([^"]+)".+', "\1")
+    Local $rev = StringRegExpReplace($stdout, '.+"_?rev":"([\d\w\-]+)".+', '\1')
+
+    ;$rev = StringLeft($rev, StringLen($rev) - 1)
+    return $rev
 EndFunc
 
 
