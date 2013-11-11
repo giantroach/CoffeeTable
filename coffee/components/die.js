@@ -13,6 +13,7 @@ coffee.include("Die", "die.html", ["Component"], function (name, ext) {
     var $ = ext.$,
         Backbone = ext.Backbone,
 
+        w = ext.w,
         Math = ext.w.Math,
 
         m = {},
@@ -62,15 +63,39 @@ coffee.include("Die", "die.html", ["Component"], function (name, ext) {
      * @submodule v.Component
      * @constructor
      */
-    v[name] = ext.v.Component.extend({
-        events: {
-            "click": "roll"
-        },
+    v[name] = (function () {
+        var underAnim = false,
+            underAnimTimer;
 
-        roll: function () {
-            this.model.roll();
-        }
-    });
+        return ext.v.Component.extend({
+            events: {
+                "click": "roll"
+            },
+
+            roll: function () {
+                this.model.roll();
+            },
+
+            afterRender: function () {
+                //roll effect
+                if (!underAnim) {
+                    w.clearTimeout(underAnimTimer);
+
+                    underAnim = true;
+                    this.$el.effect("bounce", {}, 200, function () {
+                        underAnim = false;
+                    });
+
+                    underAnimTimer = w.setTimeout(function () {
+                        //backup
+                        if (underAnim) {
+                            underAnim = false;
+                        }
+                    }, 250);
+                }
+            }
+        });
+    }());
 
 
     return {
