@@ -580,7 +580,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
 
             if (data.play) {
                 if (!data.override) {
-                    data.ovarride = {};
+                    data.override = {};
                 }
                 data.override.draggable = true;
             }
