@@ -846,7 +846,7 @@ coffee.include("Component", "components.html", [], function (name, ext) {
         /**
          * Reset styles according to the properties on model
          * @method updateStyle
-         * @param anim {Boolean} If do animation
+         * @param noAnim {Boolean} If do animation
          * @return this
          */
         updateStyle: function (noAnim) {
